@@ -6,13 +6,11 @@ import fetch from 'node-fetch';
 import lodash from 'lodash';
 import maphtml from './pages/map.html';
 
-// send a tracker script to client
+/* 
+Send a tracker script to client
+*/
 app.auth('/script.js', (req, res, next) => next())
 app.get('/script.js', async (req, res) => {
-  // send requestpayload to worker queue
-  //const db = await datastore.open();
-  //db.enqueue('TRACKER', {...req});
-
   const scriptString = "<img src=\"https://youthful-watershed-23b6.codehooks.io/pixel.gif?r='+encodeURIComponent(document.referrer || null)+'\" width=\"0\" height=\"0\" alt=\"Page view tracker\" referrerpolicy=\"no-referrer-when-downgrade\"/>";
   // send script to client
   res.set('Content-Type', 'application/javascript');
@@ -22,7 +20,9 @@ app.get('/script.js', async (req, res) => {
 });`);
 });
 
-// Send a tracking pixel
+/* 
+Send a tracking pixel
+*/
 app.auth('/pixel.gif', (req, res, next) => next())
 app.get('/pixel.gif', async (req, res) => {
   // send requestpayloadto worker queue
@@ -37,8 +37,9 @@ app.get('/pixel.gif', async (req, res) => {
   res.end();
 });
 
-/* Get Country from IP */
-
+/* 
+Get Country from IP 
+*/
 async function getCountryFromIP(ip) {
   try {
     const db = await datastore.open();
@@ -68,7 +69,6 @@ async function getCountryFromIP(ip) {
 /*
 * Aggregate analytics data
 */
-
 async function aggregateAnalyticsData(field, value) {
   const db = await datastore.open()
   const date = new Date()
@@ -105,7 +105,7 @@ async function aggregateAnalyticsData(field, value) {
 }
 
 /*
-* Tracker worker
+* Tracker worker, stores data in database
 */
 app.worker('TRACKER', async (workerdata, work) => {
   //console.log('Tracker worker', data.body);
