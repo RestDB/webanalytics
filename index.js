@@ -6,10 +6,16 @@ import fetch from 'node-fetch';
 import lodash from 'lodash';
 import maphtml from './pages/map.html';
 
+/*
+* Public routes
+*/
+app.auth('/script.js', (req, res, next) => next())
+app.auth('/pixel.gif', (req, res, next) => next())
+app.auth('/map', (req, res, next) => next())
+
 /* 
 Send a tracker script to client
 */
-app.auth('/script.js', (req, res, next) => next())
 app.get('/script.js', async (req, res) => {
   const scriptString = "<img src=\"https://youthful-watershed-23b6.codehooks.io/pixel.gif?r='+encodeURIComponent(document.referrer || null)+'\" width=\"0\" height=\"0\" alt=\"Page view tracker\" referrerpolicy=\"no-referrer-when-downgrade\"/>";
   // send script to client
@@ -23,7 +29,6 @@ app.get('/script.js', async (req, res) => {
 /* 
 Send a tracking pixel
 */
-app.auth('/pixel.gif', (req, res, next) => next())
 app.get('/pixel.gif', async (req, res) => {
   // send requestpayloadto worker queue
   const db = await datastore.open();
@@ -151,7 +156,6 @@ app.worker('TRACKER', async (workerdata, work) => {
 /*
   Web map page
 */
-app.auth('/map', (req, res, next) => next())
 app.get('/map', async (req, res) => {
   const locations = [];
   const conn = await datastore.open();
