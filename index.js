@@ -44,7 +44,7 @@ async function getCountryFromIP(ip) {
   try {
     const db = await datastore.open();
     // check if we have cached the result
-    const cachedIp = await db.get(ip)
+    const cachedIp = await db.get(`ip-${ip}`)
     if (cachedIp) {
       console.debug('Cached IP', cachedIp)
       return JSON.parse(cachedIp)
@@ -58,7 +58,7 @@ async function getCountryFromIP(ip) {
     const response = await fetch(URL, requestOptions)
     const data = await response.json()
     // cache the result
-    db.set(ip, JSON.stringify(data))
+    db.set(`ip-${ip}`, JSON.stringify(data))
     return data
   } catch (error) {
     console.error(error)
@@ -99,7 +99,7 @@ async function aggregateAnalyticsData(field, value) {
   };
   updates['$set'][field] = value
   //console.log('Aggregating data', meterQuery, updates)
-  const result = await db.updateOne('traffic', meterQuery, updates, { upsert: true })
+  const result = await db.updateOne('analytics', meterQuery, updates, { upsert: true })
   //console.log('Aggregated data result', result)
   return result
 }
@@ -108,22 +108,43 @@ async function aggregateAnalyticsData(field, value) {
 * Tracker worker, stores data in database
 */
 app.worker('TRACKER', async (workerdata, work) => {
-  //console.log('Tracker worker', data.body);
   const db = await datastore.open();
-  const data = workerdata.body.payload;
-  //const data = Object.assign({}, headers, rest);
-  const geo = await getCountryFromIP(data.headers['x-real-ip'])
-  data.geo = geo
-  const xref = data.query.r !== 'null' ? data.query.r : '';
-  let url = data.headers['referer']
-  if (url.indexOf('?') > 0) {
-    url = url.substring(0, url.indexOf('?'))
-  }
-  console.log('Tracker', data.headers['x-real-ip'], data.geo['country'], data.geo['city'], url, xref !== '' ? 'via: ' + xref : '')
+  const rawData = workerdata.body.payload;
+  
+  const headers = rawData.headers;
+  const geo = await getCountryFromIP(headers['x-real-ip']);
 
-  const result = await db.insertOne('analytics', data);
-  await aggregateAnalyticsData('page', url)
-  await aggregateAnalyticsData('city', data.geo['city'])
+  // Construct a flattened data object
+  const data = {
+    ip: headers['x-real-ip'],
+    accept: headers['accept'],
+    acceptLanguage: headers['accept-language'],
+    userAgent: headers['user-agent'],
+    referer: headers['referer'],
+    query: JSON.stringify(rawData.query),
+    apiPath: rawData.apiPath,
+    originalUrl: rawData.originalUrl,
+    params: JSON.stringify(rawData.params),
+    geoCountry: geo.country,
+    geoCity: geo.city,
+    geoRegion: geo.region,
+    geoLoc: geo.loc,
+    geoTimezone: geo.timezone,
+    timestamp: new Date().toISOString()
+  };
+
+  console.log('Tracker', {
+    ip: data.ip,
+    country: data.geoCountry,
+    city: data.geoCity,
+    url: data.referer.split('?')[0],
+    referrer: rawData.query.r !== 'null' ? `via: ${rawData.query.r}` : ''
+  });
+
+  await db.insertOne('traffic', data);
+  await aggregateAnalyticsData('page', headers.referer.split('?')[0]);
+  await aggregateAnalyticsData('city', data.geoCity);
+  await aggregateAnalyticsData('country', data.geoCountry);
   work.end();
 })
 
@@ -134,10 +155,10 @@ app.auth('/map', (req, res, next) => next())
 app.get('/map', async (req, res) => {
   const locations = [];
   const conn = await datastore.open();
-  const stream = conn.getMany('analytics', {})
+  const stream = conn.getMany('traffic', {})
   stream.on('data', (data) => {
     locations.push({      
-      "loc": data.geo.loc
+      "loc": data.geoLoc
     });
   }).on('end', () => {
     const tpl = lodash.template(maphtml)
