@@ -1,0 +1,14 @@
+{
+  "name": "webanalytics-q6us",
+  "version": "1.0.0",
+  "description": "Codehooks backend app",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "codehooks deploy && codehooks logs --follow"
+  },
+  "author": "jones@codehooks.io",
+  "license": "ISC",
+  "dependencies": {
+    "codehooks-js": "^1.2.17"
+  }
+}
