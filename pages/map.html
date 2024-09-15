@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multiple Geo Locations Map - OpenStreetMap</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         #map {
             height: 500px;
@@ -45,8 +45,8 @@
                     color: 'blue', // Optional: Change color of the circle
                     fillColor: '#30f',
                     fillOpacity: 0.5,
-                    radius: 10000 // Radius in meters for the circle
-                }).addTo(map);
+                    radius: 3000 // Radius in meters for the circle
+                }).addTo(map).bindPopup('Show meta data.');
                 
             });
 

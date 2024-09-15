@@ -142,12 +142,12 @@ app.worker('TRACKER', async (workerdata, work) => {
     ip: data.ip,
     country: data.geoCountry,
     city: data.geoCity,
-    url: data.referer.split('?')[0],
+    url: data.referer,
     referrer: data.query.r !== 'null' ? `via: ${data.query.r}` : ''
   });
 
   await db.insertOne('traffic', data);
-  await aggregateAnalyticsData('page', data.referer.split('?')[0]);
+  await aggregateAnalyticsData('page', data.referer);
   await aggregateAnalyticsData('city', data.geoCity);
   await aggregateAnalyticsData('country', data.geoCountry);
   work.end();
