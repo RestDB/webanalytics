@@ -126,10 +126,10 @@ app.worker('TRACKER', async (workerdata, work) => {
     acceptLanguage: headers['accept-language'],
     userAgent: headers['user-agent'],
     referer: headers['referer'],
-    query: JSON.stringify(rawData.query),
+    query: rawData.query,
     apiPath: rawData.apiPath,
     originalUrl: rawData.originalUrl,
-    params: JSON.stringify(rawData.params),
+    params: rawData.params,
     geoCountry: geo.country,
     geoCity: geo.city,
     geoRegion: geo.region,
@@ -143,11 +143,11 @@ app.worker('TRACKER', async (workerdata, work) => {
     country: data.geoCountry,
     city: data.geoCity,
     url: data.referer.split('?')[0],
-    referrer: rawData.query.r !== 'null' ? `via: ${rawData.query.r}` : ''
+    referrer: data.query.r !== 'null' ? `via: ${data.query.r}` : ''
   });
 
   await db.insertOne('traffic', data);
-  await aggregateAnalyticsData('page', headers.referer.split('?')[0]);
+  await aggregateAnalyticsData('page', data.referer.split('?')[0]);
   await aggregateAnalyticsData('city', data.geoCity);
   await aggregateAnalyticsData('country', data.geoCountry);
   work.end();
