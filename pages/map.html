@@ -6,38 +6,81 @@
     <title>Multiple Geo Locations Map - OpenStreetMap</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="assets/heatmap.min.js"></script>
+    <script src="assets/leaflet-heatmap.js"></script>
     <style>
         #map {
-            height: 500px;
+            height: 100vh;
             width: 100%;
+        }
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
 <body>
     <h3>Web Analytics Geo Locations Map (OpenStreetMap)</h3>
-    <div id="map"></div>
-
+    <div id="map"></div>    
+    
     <script>
         function initMap() {
             // Array of geo-location data as a template variable
             const geoLocations = <%=locations%>;
 
+            var baseLayer = L.tileLayer(
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+                    maxZoom: 18
+                }
+            );
+            
+            var cfg = {
+                // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+                "radius": 1,
+                "maxOpacity": .45,
+                // scales the radius based on map zoom
+                "scaleRadius": true,
+                // if set to false the heatmap uses the global maximum for colorization
+                // if activated: uses the data maximum within the current map boundaries
+                //   (there will always be a red spot with useLocalExtremas true)
+                "useLocalExtrema": false,
+                // which field name in your data represents the latitude - default "lat"
+                latField: 'lat',
+                // which field name in your data represents the longitude - default "lng"
+                lngField: 'lng',
+                // which field name in your data represents the data value - default "value"
+                valueField: 'count'
+            };
+
+
+            var heatmapLayer = new HeatmapOverlay(cfg);
+
+
             // Initialize the map and set its view to a global view with a default zoom level
-            const map = L.map('map').setView([20, 0], 2);
+            //const map = L.map('map').setView([20, 0], 2);
+            var map = new L.Map('map', {            
+                layers: [baseLayer, heatmapLayer]
+            });
 
             // Set up OpenStreetMap tiles with English language
+            /*
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 language: 'en'
             }).addTo(map);
+            */
+            
+            //baseLayer.setData(geoLocations);
 
             // Create a bounds object to adjust the map view based on locations
             const bounds = L.latLngBounds();
 
             // Loop through each geo-location and adjust the bounds
-            geoLocations.forEach((geoData) => {
-                const latLng = geoData.loc.split(',').map(Number);
-                const location = L.latLng(latLng[0], latLng[1]);
+            
+            geoLocations.data.forEach((geoData) => {
+                const location = L.latLng(geoData.lat, geoData.lng);
                 bounds.extend(location); // Extend bounds to include this location
 
                 // Add a circle marker for visibility (this is not a regular marker)
@@ -45,13 +88,15 @@
                     color: 'blue', // Optional: Change color of the circle
                     fillColor: '#30f',
                     fillOpacity: 0.5,
-                    radius: 3000 // Radius in meters for the circle
+                    radius: 100 // Radius in meters for the circle
                 }).addTo(map).bindPopup('Show meta data.');
                 
             });
-
+            
+            
             // Adjust the map view to fit all geo-locations
             map.fitBounds(bounds);
+            heatmapLayer.setData(geoLocations);
         }
 
         // Initialize the map when the page loads

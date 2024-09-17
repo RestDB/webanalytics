@@ -5,6 +5,7 @@ import { app, datastore } from 'codehooks-js'
 import fetch from 'node-fetch';
 import lodash from 'lodash';
 import maphtml from './pages/map.html';
+import UAParser from 'ua-parser-js';
 
 /*
 * Public routes
@@ -18,12 +19,47 @@ Send a tracker script to client
 */
 app.get('/script.js', async (req, res) => {
   const scriptString = "<img src=\"https://youthful-watershed-23b6.codehooks.io/pixel.gif?r='+encodeURIComponent(document.referrer || null)+'\" width=\"0\" height=\"0\" alt=\"Page view tracker\" referrerpolicy=\"no-referrer-when-downgrade\"/>";
+  const spaNavString = "<img src=\"https://youthful-watershed-23b6.codehooks.io/pixel.gif?r='+encodeURIComponent(window.location.href || null)+'\" width=\"0\" height=\"0\" alt=\"Page view tracker\" referrerpolicy=\"no-referrer-when-downgrade\"/>";
   // send script to client
   res.set('Content-Type', 'application/javascript');
-  res.send(`document.write('${scriptString}'); window.addEventListener('hashchange', function() {
-  // Your tracking code here
-  console.log('Navigated to:', window.location.href);
-});`);
+  res.send(`document.write('${scriptString}'); 
+  (function(history) {
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function(state, title, url) {
+        const result = originalPushState.apply(history, arguments);
+        window.dispatchEvent(new Event('urlchange'));
+        return result;
+    };
+
+    history.replaceState = function(state, title, url) {
+        const result = originalReplaceState.apply(history, arguments);
+        window.dispatchEvent(new Event('urlchange'));
+        return result;
+    };
+  })(window.history);
+
+  // Function to track URL changes
+  function trackUrlChange() {
+    console.log('URL changed to:', window.location.href);
+    document.body.insertAdjacentHTML('beforeend', '${spaNavString}');
+  }
+
+  // Listen for URL changes
+  window.addEventListener('urlchange', trackUrlChange);
+
+  // Listen for hash changes
+  window.addEventListener('hashchange', trackUrlChange);
+
+  // Listen for clicks on hash links
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('a');
+    if (target && target.hash && target.origin + target.pathname === window.location.origin + window.location.pathname) {
+      trackUrlChange();
+    }
+  });
+`);
 });
 
 /* 
@@ -76,12 +112,7 @@ async function getCountryFromIP(ip) {
 */
 async function aggregateAnalyticsData(field, value) {
   const db = await datastore.open()
-  const date = new Date()
-  let year = date.getUTCFullYear().toString()
-  let month = (date.getUTCMonth() + 1).toString().padStart(2, '0')
-  let day = date.getUTCDate().toString().padStart(2, '0')
-  let hour = date.getUTCHours().toString().padStart(2, '0')
-  let second = date.getUTCSeconds().toString().padStart(2, '0')
+  const { year, month, day, hour } = getDateComponents()
   //console.log('Aggregating data for', year, month, day, hour, second);
   const meterQuery = {
     "year": year,
@@ -109,6 +140,17 @@ async function aggregateAnalyticsData(field, value) {
   return result
 }
 
+function getDateComponents() {
+  const date = new Date()
+  return {
+    year: date.getUTCFullYear().toString(),
+    month: (date.getUTCMonth() + 1).toString().padStart(2, '0'),
+    day: date.getUTCDate().toString().padStart(2, '0'),
+    hour: date.getUTCHours().toString().padStart(2, '0'),
+    second: date.getUTCSeconds().toString().padStart(2, '0')
+  }
+}
+
 /*
 * Tracker worker, stores data in database
 */
@@ -119,14 +161,22 @@ app.worker('TRACKER', async (workerdata, work) => {
   const headers = rawData.headers;
   const geo = await getCountryFromIP(headers['x-real-ip']);
 
+  // Parse user-agent string
+  const parser = new UAParser(headers['user-agent']);
+  const userAgentInfo = parser.getResult();
+
   // Construct a flattened data object
   const data = {
     ip: headers['x-real-ip'],
     accept: headers['accept'],
     acceptLanguage: headers['accept-language'],
     userAgent: headers['user-agent'],
+    osName: userAgentInfo.os.name || "unknown",
+    osVersion: userAgentInfo.os.version || "unknown",
+    deviceVendor: userAgentInfo.device.vendor || "unknown",
+    deviceModel: userAgentInfo.device.model || "unknown",
+    deviceType: userAgentInfo.device.type || "unknown",
     referer: headers['referer'],
-    query: rawData.query,
     apiPath: rawData.apiPath,
     originalUrl: rawData.originalUrl,
     params: rawData.params,
@@ -138,18 +188,29 @@ app.worker('TRACKER', async (workerdata, work) => {
     timestamp: new Date().toISOString()
   };
 
-  console.log('Tracker', {
-    ip: data.ip,
-    country: data.geoCountry,
-    city: data.geoCity,
-    url: data.referer,
-    referrer: data.query.r !== 'null' ? `via: ${data.query.r}` : ''
-  });
+  // Add 'via' field if data.query exists and data.query.r is not 'null'
+  if (rawData.query && rawData.query.r !== 'null') {
+    data.via = rawData.query.r;
+  }
+  // add date components
+  const { year, month, day, hour } = getDateComponents()
+  data.year = year
+  data.month = month
+  data.day = day
+  data.hour = hour
 
+  console.log('Tracker', data);
+  let pageUrl = data.referer;
+  if (pageUrl.indexOf('?') > 0) {
+    pageUrl = pageUrl.split('?')[0];
+  }
   await db.insertOne('traffic', data);
-  await aggregateAnalyticsData('page', data.referer);
+  await aggregateAnalyticsData('page', pageUrl);
   await aggregateAnalyticsData('city', data.geoCity);
   await aggregateAnalyticsData('country', data.geoCountry);
+  if (data.via && data.via !== 'null') {
+    await aggregateAnalyticsData('via', data.via);
+  }
   work.end();
 })
 
@@ -161,16 +222,22 @@ app.get('/map', async (req, res) => {
   const conn = await datastore.open();
   const stream = conn.getMany('traffic', {})
   stream.on('data', (data) => {
+    // lat: 24.6408, lng:46.7728, count: 3
+    const latLng = data.geoLoc.split(',').map(Number);
     locations.push({      
-      "loc": data.geoLoc
+      lat: latLng[0], lng:latLng[1], count: 1
     });
   }).on('end', () => {
     const tpl = lodash.template(maphtml)
     res.set('Content-Type', 'text/html');
-    res.send(tpl({ locations: JSON.stringify(locations) }))
+    res.send(tpl({ locations: JSON.stringify({data: locations}) }))
   })
 });
 
+/*
+Serve static assets
+*/
+app.static({route: '/assets', directory: '/pages'})
 
 // bind to serverless runtime
 export default app.init(async () => {

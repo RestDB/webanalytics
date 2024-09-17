@@ -9,6 +9,7 @@
   "author": "jones@codehooks.io",
   "license": "ISC",
   "dependencies": {
-    "codehooks-js": "^1.2.17"
+    "codehooks-js": "^1.2.17",
+    "ua-parser-js": "^1.0.39"
   }
 }
