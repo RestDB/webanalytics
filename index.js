@@ -7,6 +7,7 @@ import lodash from 'lodash';
 import maphtml from './pages/map.html';
 import UAParser from 'ua-parser-js';
 import { countries } from 'countries-list';
+import analyticsScript from './analytics-script.js';
 
 /*
 * Public routes
@@ -20,83 +21,7 @@ Send a tracker script to client
 */
 app.get('/script.js', async (req, res) => {
   res.set('Content-Type', 'application/javascript');
-  res.send(`
-  // Generate a unique session ID
-  function generateSessionId() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
-  // Get or create session ID
-  let sessionId = localStorage.getItem('analyticsSessionId');
-  if (!sessionId) {
-    sessionId = generateSessionId();
-    localStorage.setItem('analyticsSessionId', sessionId);
-  }
-
-  // Function to send tracking pixel
-  function sendTrackingPixel(url) {
-    const img = new Image();
-    img.src = 'https://youthful-watershed-23b6.codehooks.io/pixel.gif?r=' + encodeURIComponent(url) + '&sid=' + sessionId;
-    img.width = 0;
-    img.height = 0;
-    img.alt = "Page view tracker";
-    img.style.display = 'none';
-    img.referrerPolicy = "no-referrer-when-downgrade";
-    if (document.body) {
-      document.body.appendChild(img);
-    } else {
-      window.addEventListener('DOMContentLoaded', function() {
-        document.body.appendChild(img);
-      });
-    }
-  }
-
-  // Initial page load tracking
-  window.addEventListener('DOMContentLoaded', function() {
-    // Initial page load tracking
-    sendTrackingPixel(document.referrer || null);
-  });
-
-  // Function to track URL changes
-  function trackUrlChange() {
-    console.log('URL changed to:', window.location.href);
-    sendTrackingPixel(window.location.href);
-  }
-
-  (function(history) {
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function(state, title, url) {
-        const result = originalPushState.apply(history, arguments);
-        window.dispatchEvent(new Event('urlchange'));
-        return result;
-    };
-
-    history.replaceState = function(state, title, url) {
-        const result = originalReplaceState.apply(history, arguments);
-        window.dispatchEvent(new Event('urlchange'));
-        return result;
-    };
-  })(window.history);
-
-  // Listen for URL changes
-  window.addEventListener('urlchange', trackUrlChange);
-
-  // Listen for hash changes
-  window.addEventListener('hashchange', trackUrlChange);
-
-  // Listen for clicks on hash links
-  document.addEventListener('click', function(e) {
-    const target = e.target.closest('a');
-    if (target && target.hash && target.origin + target.pathname === window.location.origin + window.location.pathname) {
-      trackUrlChange();
-    }
-  });
-  `);
+  res.send(analyticsScript);
 });
 
 /* 
@@ -147,8 +72,8 @@ async function getCountryFromIP(ip) {
 /*
 * Aggregate analytics data
 */
-async function aggregateAnalyticsData(field, value) {
-  //console.log('Aggregating data', field, value)
+async function aggregateAnalyticsData(field, value, extra) {
+  console.log('Aggregating data', field, value, extra)
   const db = await datastore.open()
   const { year, month, day, hour } = getDateComponents()
   //console.log('Aggregating data for', year, month, day, hour, second);
@@ -172,6 +97,9 @@ async function aggregateAnalyticsData(field, value) {
     $inc: { count: 1 }
   };
   updates['$set'][field] = value
+  if (extra) {
+    updates['$push'] = extra
+  }
   //console.log('Aggregating data', meterQuery, updates)
   const result = await db.updateOne('analytics', meterQuery, updates, { upsert: true })
   //console.log('Aggregated data result', result)
@@ -190,7 +118,7 @@ function getDateComponents() {
 }
 
 /*
-* Tracker worker, stores data in database
+* Tracker Queue Worker, stores data in database
 */
 app.worker('TRACKER', async (workerdata, work) => {
   const db = await datastore.open();
@@ -227,13 +155,23 @@ app.worker('TRACKER', async (workerdata, work) => {
     timestamp: new Date().toISOString()
   };
 
-  // Add 'via' field if data.query exists and data.query.r is not 'null'
-  if (rawData.query && rawData.query.r !== 'null') {
-    data.via = rawData.query.r;
+  if (rawData.query) {
+    if (rawData.query.r !== 'null') {
+      data.via = rawData.query.r;
+    }
+
+    // add session id
+    if (rawData.query.sid) {
+      data.sessionId = rawData.query.sid;
+    }
+
+    // add event data
+    if (rawData.query.event) {
+      data.event = rawData.query.event;
+      data.eventData = rawData.query.data;
+    }
   }
-  if (rawData.query && rawData.query.sid) {
-    data.sessionId = rawData.query.sid;
-  }
+  
   // add date components
   const { year, month, day, hour } = getDateComponents()
   data.year = year
@@ -258,16 +196,19 @@ app.worker('TRACKER', async (workerdata, work) => {
     await db.enqueue('AGGREGATE', { field: 'via', value: data.via });
   }
   if (data.sessionId) {
-    await db.enqueue('AGGREGATE', { field: 'user', value: data.sessionId });
+    await db.enqueue('AGGREGATE', { field: 'user', value: data.sessionId, "history": data.referer, "geoCountry": data.geoCountry, "timestamp": data.timestamp, event: data.event, eventData: data.eventData  });
+  }
+  if (data.event) {
+    await db.enqueue('AGGREGATE', { field: 'event', value: data.event});
   }
 
   work.end();
 });
 
-// Add a new AGGREGATE worker
+// AGGREGATE Queue Worker
 app.worker('AGGREGATE', async (workerdata, work) => {
-  const { field, value } = workerdata.body.payload;
-  await aggregateAnalyticsData(field, value);
+  const { field, value, history, geoCountry, timestamp, event } = workerdata.body.payload;
+  await aggregateAnalyticsData(field, value, field === 'user' ? {history: {page: history, geoCountry: geoCountry, timestamp: timestamp, event}} : null);
   work.end();
 });
 
