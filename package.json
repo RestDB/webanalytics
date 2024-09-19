@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "codehooks-js": "^1.2.17",
+    "countries-list": "^3.1.1",
     "ua-parser-js": "^1.0.39"
   }
 }

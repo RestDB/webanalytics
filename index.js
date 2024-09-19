@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 import lodash from 'lodash';
 import maphtml from './pages/map.html';
 import UAParser from 'ua-parser-js';
+import { countries } from 'countries-list';
 
 /*
 * Public routes
@@ -18,11 +19,53 @@ app.auth('/map', (req, res, next) => next())
 Send a tracker script to client
 */
 app.get('/script.js', async (req, res) => {
-  const scriptString = "<img src=\"https://youthful-watershed-23b6.codehooks.io/pixel.gif?r='+encodeURIComponent(document.referrer || null)+'\" width=\"0\" height=\"0\" alt=\"Page view tracker\" referrerpolicy=\"no-referrer-when-downgrade\"/>";
-  const spaNavString = "<img src=\"https://youthful-watershed-23b6.codehooks.io/pixel.gif?r='+encodeURIComponent(window.location.href || null)+'\" width=\"0\" height=\"0\" alt=\"Page view tracker\" referrerpolicy=\"no-referrer-when-downgrade\"/>";
-  // send script to client
   res.set('Content-Type', 'application/javascript');
-  res.send(`document.write('${scriptString}'); 
+  res.send(`
+  // Generate a unique session ID
+  function generateSessionId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  // Get or create session ID
+  let sessionId = localStorage.getItem('analyticsSessionId');
+  if (!sessionId) {
+    sessionId = generateSessionId();
+    localStorage.setItem('analyticsSessionId', sessionId);
+  }
+
+  // Function to send tracking pixel
+  function sendTrackingPixel(url) {
+    const img = new Image();
+    img.src = 'https://youthful-watershed-23b6.codehooks.io/pixel.gif?r=' + encodeURIComponent(url) + '&sid=' + sessionId;
+    img.width = 0;
+    img.height = 0;
+    img.alt = "Page view tracker";
+    img.style.display = 'none';
+    img.referrerPolicy = "no-referrer-when-downgrade";
+    if (document.body) {
+      document.body.appendChild(img);
+    } else {
+      window.addEventListener('DOMContentLoaded', function() {
+        document.body.appendChild(img);
+      });
+    }
+  }
+
+  // Initial page load tracking
+  window.addEventListener('DOMContentLoaded', function() {
+    // Initial page load tracking
+    sendTrackingPixel(document.referrer || null);
+  });
+
+  // Function to track URL changes
+  function trackUrlChange() {
+    console.log('URL changed to:', window.location.href);
+    sendTrackingPixel(window.location.href);
+  }
+
   (function(history) {
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
@@ -40,12 +83,6 @@ app.get('/script.js', async (req, res) => {
     };
   })(window.history);
 
-  // Function to track URL changes
-  function trackUrlChange() {
-    console.log('URL changed to:', window.location.href);
-    document.body.insertAdjacentHTML('beforeend', '${spaNavString}');
-  }
-
   // Listen for URL changes
   window.addEventListener('urlchange', trackUrlChange);
 
@@ -59,7 +96,7 @@ app.get('/script.js', async (req, res) => {
       trackUrlChange();
     }
   });
-`);
+  `);
 });
 
 /* 
@@ -111,6 +148,7 @@ async function getCountryFromIP(ip) {
 * Aggregate analytics data
 */
 async function aggregateAnalyticsData(field, value) {
+  //console.log('Aggregating data', field, value)
   const db = await datastore.open()
   const { year, month, day, hour } = getDateComponents()
   //console.log('Aggregating data for', year, month, day, hour, second);
@@ -181,6 +219,7 @@ app.worker('TRACKER', async (workerdata, work) => {
     originalUrl: rawData.originalUrl,
     params: rawData.params,
     geoCountry: geo.country,
+    geoCountryName: countries[geo.country]?.name || geo.country,
     geoCity: geo.city,
     geoRegion: geo.region,
     geoLoc: geo.loc,
@@ -192,6 +231,9 @@ app.worker('TRACKER', async (workerdata, work) => {
   if (rawData.query && rawData.query.r !== 'null') {
     data.via = rawData.query.r;
   }
+  if (rawData.query && rawData.query.sid) {
+    data.sessionId = rawData.query.sid;
+  }
   // add date components
   const { year, month, day, hour } = getDateComponents()
   data.year = year
@@ -201,18 +243,33 @@ app.worker('TRACKER', async (workerdata, work) => {
 
   console.log('Tracker', data);
   let pageUrl = data.referer;
-  if (pageUrl.indexOf('?') > 0) {
+  if (pageUrl && pageUrl.indexOf('?') > 0) {
     pageUrl = pageUrl.split('?')[0];
   }
+  // store traffic data
   await db.insertOne('traffic', data);
-  await aggregateAnalyticsData('page', pageUrl);
-  await aggregateAnalyticsData('city', data.geoCity);
-  await aggregateAnalyticsData('country', data.geoCountry);
+  // stora raw data
+  await db.insertOne('rawdata', { ...rawData });
+  // Queue aggregation tasks
+  await db.enqueue('AGGREGATE', { field: 'page', value: pageUrl });
+  await db.enqueue('AGGREGATE', { field: 'city', value: data.geoCity });
+  await db.enqueue('AGGREGATE', { field: 'country', value: data.geoCountry });
   if (data.via && data.via !== 'null') {
-    await aggregateAnalyticsData('via', data.via);
+    await db.enqueue('AGGREGATE', { field: 'via', value: data.via });
   }
+  if (data.sessionId) {
+    await db.enqueue('AGGREGATE', { field: 'user', value: data.sessionId });
+  }
+
   work.end();
-})
+});
+
+// Add a new AGGREGATE worker
+app.worker('AGGREGATE', async (workerdata, work) => {
+  const { field, value } = workerdata.body.payload;
+  await aggregateAnalyticsData(field, value);
+  work.end();
+});
 
 /*
   Web map page
@@ -244,5 +301,5 @@ export default app.init(async () => {
   console.log('I run on deploy once')
   const db = await datastore.open()
   // await db.createCollection('analytics')
-  //await db.createCollection('traffic')
+  //await db.createCollection('traffic');
 });
