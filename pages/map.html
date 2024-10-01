@@ -6,12 +6,12 @@
     <title>Multiple Geo Locations Map - OpenStreetMap</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="assets/heatmap.min.js"></script>
-    <script src="assets/leaflet-heatmap.js"></script>
+    <script src="dashboard/heatmap.min.js"></script>
+    <script src="dashboard/leaflet-heatmap.js"></script>
     <style>
         #map {
-            height: 100vh;
-            width: 100%;
+            height: 30vh;
+            width: 80%;
         }
         body, html {
             height: 100%;
@@ -61,7 +61,9 @@
             // Initialize the map and set its view to a global view with a default zoom level
             //const map = L.map('map').setView([20, 0], 2);
             var map = new L.Map('map', {            
-                layers: [baseLayer, heatmapLayer]
+                layers: [baseLayer, heatmapLayer],
+                center: [48.8566, 2.3522], // Coordinates for Paris
+                zoom: 4 // Adjust this value to set the initial zoom level
             });
 
             // Set up OpenStreetMap tiles with English language
@@ -84,18 +86,26 @@
                 bounds.extend(location); // Extend bounds to include this location
 
                 // Add a circle marker for visibility (this is not a regular marker)
+                /*
                 L.circle(location, {
                     color: 'blue', // Optional: Change color of the circle
                     fillColor: '#30f',
                     fillOpacity: 0.5,
                     radius: 100 // Radius in meters for the circle
                 }).addTo(map).bindPopup('Show meta data.');
+                */
+                L.circle(location, {
+                    color: 'black', // Optional: Change color of the circle
+                    fillColor: '#30f',
+                    fillOpacity: 0.1,
+                    radius: 1000 // Radius in meters for the circle
+                }).addTo(map);
                 
             });
             
             
             // Adjust the map view to fit all geo-locations
-            map.fitBounds(bounds);
+            //map.fitBounds(bounds);
             heatmapLayer.setData(geoLocations);
         }
 

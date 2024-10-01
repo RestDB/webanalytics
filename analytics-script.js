@@ -1,4 +1,4 @@
-export default `
+export default (host) => `
   // Generate a unique session ID
   function generateSessionId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -7,17 +7,27 @@ export default `
     });
   }
 
-  // Get or create session ID
-  let sessionId = localStorage.getItem('analyticsSessionId');
-  if (!sessionId) {
+  // Get or create session ID and timestamp
+  let sessionData = localStorage.getItem('analyticsSessionData');
+  let sessionId;
+  if (!sessionData) {
     sessionId = generateSessionId();
-    localStorage.setItem('analyticsSessionId', sessionId);
+  } else {
+    sessionData = JSON.parse(sessionData);
+    sessionId = generateSessionId(); // Generate a new session ID
   }
+  
+  // Update session data with current timestamp
+  sessionData = {
+    sessionId: sessionId,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('analyticsSessionData', JSON.stringify(sessionData));
 
   // Function to send tracking pixel
   function sendTrackingPixel(url, eventName = null, eventData = null) {
     const img = new Image();
-    let pixelUrl = 'https://youthful-watershed-23b6.codehooks.io/pixel.gif?r=' + encodeURIComponent(url) + '&sid=' + sessionId;
+    let pixelUrl = 'https://${host}/pixel.gif?r=' + encodeURIComponent(url) + '&sid=' + sessionId;
     
     if (eventName) {
       pixelUrl += '&event=' + encodeURIComponent(eventName);
@@ -97,4 +107,17 @@ export default `
       trackUrlChange();
     }
   });
-  `
+
+  // Function to track page exit
+  function trackPageExit() {
+    const sessionData = JSON.parse(localStorage.getItem('analyticsSessionData'));
+    const sessionStartTime = new Date(sessionData.timestamp);
+    const sessionEndTime = new Date();
+    const sessionDuration = sessionEndTime - sessionStartTime;
+    
+    sendTrackingPixel(window.location.href, 'page_exit', { sessionDuration });
+  }
+
+  // Listen for page exit
+  window.addEventListener('beforeunload', trackPageExit);
+`
