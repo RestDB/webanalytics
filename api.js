@@ -147,8 +147,15 @@ export async function getAggregatedStats(req, res) {
 
 // New global function
 function parseDateRange(from, to) {
-  const [fromYear, fromMonth, fromDay, fromHour] = from.split('-');
-  const [toYear, toMonth, toDay, toHour] = to.split('-');
+  // from and to are in ISO format: YYYY-MM-DDThh:mm:ss
+  const [fromDate, fromTime] = from.split('T');
+  const [fromYear, fromMonth, fromDay] = fromDate.split('-');
+  const fromHour = fromTime.split(':')[0];
+
+  const [toDate, toTime] = to.split('T');
+  const [toYear, toMonth, toDay] = toDate.split('-');
+  const toHour = toTime.split(':')[0];
+
   return { fromYear, fromMonth, fromDay, fromHour, toYear, toMonth, toDay, toHour };
 }
 

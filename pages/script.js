@@ -82,43 +82,57 @@ function dashboard() {
 
         async fetchStats() {
             try {
-                const today = new Date();
-                const todayStr = today.toISOString();
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                today.setHours(24, 0, 0, 0);
+                const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
+                const nowStr = now.toISOString();
+
+                // Yesterday: [yesterday start of day, yesterday end of day] in UTC
+                const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
+                const yesterdayStr = yesterday.toISOString();
+                const yesterdayEndStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
+
+                // Two days ago: [two days ago start of day, two days ago end of day] in UTC
+                const twoDaysAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 2));
+                const twoDaysAgoStr = twoDaysAgo.toISOString();
+                const twoDaysAgoEndStr = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate()) - 1).toISOString();
+
+                // One week ago: [7 days ago start of day, current time] in UTC
+                const oneWeekAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
+                const oneWeekAgoStr = oneWeekAgo.toISOString();
+
+                // One month ago: [1 month ago start of day, current time] in UTC
+                const oneMonthAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, today.getUTCDate()));
+                const oneMonthAgoStr = oneMonthAgo.toISOString();
+
+                // One year ago: [1 year ago start of day, current time] in UTC
+                const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear() - 1, today.getUTCMonth(), today.getUTCDate()));
+                const oneYearAgoStr = oneYearAgo.toISOString();
+
                 let fromPeriodStr = '';
                 let toPeriodStr = '';
-                
-                let [year, month, day] = todayStr.split('T')[0].split('-');
-                let [hour, minute, second] = todayStr.split('T')[1].split(':');
-                // adjust hour 1 ahead
-                hour = ajustPeriod(hour, -1)
+
                 switch (this.period) {
                     case 'day':
-                        fromPeriodStr = `${year}-${month}-${day}-00`;
-                        toPeriodStr = `${year}-${month}-${day}-${hour}`;
+                        fromPeriodStr = todayStr;
+                        toPeriodStr = nowStr;
                         break;
                     case 'yesterday':
-                        fromPeriodStr = `${year}-${month}-${ajustPeriod(day, 1)}-00`;
-                        toPeriodStr = `${year}-${month}-${ajustPeriod(day, 1)}-23`;
+                        fromPeriodStr = yesterdayStr;
+                        toPeriodStr = yesterdayEndStr;
                         break;
                     case 'week':
-                        fromPeriodStr = `${year}-${month}-${ajustPeriod(day, 7)}-00`;
-                        toPeriodStr = `${year}-${month}-${day}-23`;
-                        break;
-                    case 'lastweek':
-                        fromPeriodStr = `${year}-${month}-${ajustPeriod(day, 14)}-00`;
-                        toPeriodStr = `${year}-${month}-${ajustPeriod(day, 7)}-23`;
+                        fromPeriodStr = oneWeekAgoStr;
+                        toPeriodStr = nowStr;
                         break;
                     case 'month':
-                        fromPeriodStr = `${year}-${ajustPeriod(month, 1)}-01-00`;
-                        toPeriodStr = `${year}-${month}-${day}-23`;
-                        break;
-                    case 'lastmonth':
-                        fromPeriodStr = `${year}-${ajustPeriod(month, 1)}-01-00`;
-                        toPeriodStr = `${year}-${ajustPeriod(month, 1)}-${day}-23`;
+                        fromPeriodStr = oneMonthAgoStr;
+                        toPeriodStr = nowStr;
                         break;
                     case 'year':
-                        fromPeriodStr = `${year}-01-01-00`;
-                        toPeriodStr = `${year}-${month}-${day}-23`;
+                        fromPeriodStr = oneYearAgoStr;
+                        toPeriodStr = nowStr;
                         break;
                 }
                 // Define multiple API endpoints
