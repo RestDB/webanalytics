@@ -83,10 +83,11 @@ function dashboard() {
         async fetchStats() {
             try {
                 const now = new Date();
+                //now.setHours(24, 0, 0, 0);
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 today.setHours(24, 0, 0, 0);
                 const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
-                const nowStr = now.toISOString();
+                const nowStr = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1)).toISOString()
 
                 // Yesterday: [yesterday start of day, yesterday end of day] in UTC
                 const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));

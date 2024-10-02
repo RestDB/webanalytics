@@ -31,16 +31,12 @@ export async function getAggregatedStats(req, res) {
     let topReferers = {};
     let topCountries = {};
     let topEvents = {};
-    // Initiate page view per
-    const pageViewsPerHour = Array(24).fill(0);
-    // Initiate page views per day of month, grouped from 01-31
-    const pageViewsPerDayOfMonth = Array(31).fill(0);
-    // Initiate page views per day of week, grouped from mon-sun
-    const pageViewsPerDayOfWeek = Array(7).fill(0);
-    // Initiate page views per month, grouped from 01-12
-    const pageViewsPerMonth = Array(12).fill(0);
-    // Initiate page views per year, grouped from 01-12
-    const pageViewsPerYear = Array(12).fill(0);
+    let sessionCountries = new Map(); // New map to track unique sessions per country
+
+    let pageViewsPerHour = new Array(24).fill(0);
+    let pageViewsPerDayOfWeek = new Array(7).fill(0);
+    let pageViewsPerDayOfMonth = new Array(31).fill(0);
+    let pageViewsPerMonth = new Array(12).fill(0);
 
     await cursor.forEach((item) => {
       // Calculate unique users and total page views
@@ -64,15 +60,18 @@ export async function getAggregatedStats(req, res) {
       }
       // calculate top referrers
       if (item.via) {
-        if (item.via.indexOf('codehooks.io') > 0) {
+        if (item.via.indexOf(domain) > 0) {
           item.via = 'Direct';
         }
         item.via = urlToBrandName(item.via);
         topReferers[item.via] = (topReferers[item.via] || 0) + 1;
       }
-      // calculate top countries
+      // calculate top countries (unique sessions per country)
       if (item.geoCountryName) {
-        topCountries[item.geoCountryName] = (topCountries[item.geoCountryName] || 0) + 1;
+        if (!sessionCountries.has(item.sessionId)) {
+          sessionCountries.set(item.sessionId, item.geoCountryName);
+          topCountries[item.geoCountryName] = (topCountries[item.geoCountryName] || 0) + 1;
+        }
       }
       // calculate top events
       if (item.event && item.event !== 'page_exit') {

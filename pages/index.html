@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.3/dist/full.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="output.css" rel="stylesheet" type="text/css" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -18,7 +18,7 @@
     <style>
         .leaflet-container {
 			height: 400px;
-			width: 600px;
+			width: 100%;
 			max-width: 100%;
 			max-height: 100%;
 		}
@@ -212,12 +212,12 @@
             <!-- Top 5 Countries -->
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h2 class="card-title">Top 5 Countries</h2>
+                    <h2 class="card-title">Top Countries</h2>
                     <table class="table-auto">
                         <thead>
                             <tr>
                                 <th class="text-left font-semibold pr-4">Country</th>
-                                <th class="text-right font-semibold">Views</th>
+                                <th class="text-right font-semibold">People</th>
                             </tr>
                         </thead>
                         <tbody>
