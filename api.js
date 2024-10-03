@@ -10,13 +10,13 @@ export async function getAggregatedStats(req, res) {
   try {
     const { domain } = req.query;
     const { from, to } = req.params;
-    const { fromYear, fromMonth, fromDay, fromHour, toYear, toMonth, toDay, toHour } = parseDateRange(from, to);
+    //const { fromYear, fromMonth, fromDay, fromHour, toYear, toMonth, toDay, toHour } = parseDateRange(from, to);
     const db = await datastore.open();
     const query = {
       domain,
       timestamp: {
-        $gte: `${fromYear}-${fromMonth}-${fromDay}T${fromHour}`,
-        $lte: `${toYear}-${toMonth}-${toDay}T${toHour}`
+        $gte: from,
+        $lte: to
       }
     };
     const cursor = db.getMany('traffic', query);
