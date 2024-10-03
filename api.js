@@ -53,7 +53,10 @@ export async function getAggregatedStats(req, res) {
       if (item.event === 'page_exit' && item.eventData && item.eventData.sessionDuration) {
         totalSessionDuration += item.eventData.sessionDuration;
       }
-      sessionCounts[item.sessionId] = (sessionCounts[item.sessionId] || 0) + 1;
+      // count page views per session
+      if ((item.event || null) !== 'page_exit') {
+        sessionCounts[item.sessionId] = (sessionCounts[item.sessionId] || 0) + 1;
+      }
       // calculate top pages
       if (item.referer) {
         topPages[item.referer] = (topPages[item.referer] || 0) + 1;
@@ -174,11 +177,12 @@ function urlToBrandName(url) {
     'reddit.com': 'Reddit',
     'snapchat.com': 'Snapchat',
     'tiktok.com': 'TikTok',
-    'twitter.com': 'Twitter',
+    'twitter.com': 'X (Twitter)',
     'whatsapp.com': 'WhatsApp',
     'yahoo.com': 'Yahoo',
     'yandex.ru': 'Yandex',
     'youtube.com': 'YouTube',
+    't.co': 'X (Twitter)',
   };
 
   for (const [domain, brand] of Object.entries(brandMap)) {
@@ -186,5 +190,5 @@ function urlToBrandName(url) {
       return brand;
     }
   }
-  return url;
+  return url.replace('https://', '');
 }
