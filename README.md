@@ -197,7 +197,7 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
 
 ## Dashboard
 
-Access your analytics dashboard at `https://your-app-url.com/dashboard`
+Access your analytics dashboard at `https://your-coho-app-url.codehooks.io | your-domain.com/dashboard`
 
 ## Contributing
 
