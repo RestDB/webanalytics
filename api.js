@@ -10,8 +10,7 @@ export async function getAggregatedStats(req, res) {
   try {
     const { domain } = req.query;
     const { from, to } = req.params;
-    //const { fromYear, fromMonth, fromDay, fromHour, toYear, toMonth, toDay, toHour } = parseDateRange(from, to);
-    const db = await datastore.open();
+    
     const query = {
       domain,
       timestamp: {
@@ -19,6 +18,7 @@ export async function getAggregatedStats(req, res) {
         $lte: to
       }
     };
+    const db = await datastore.open();
     const cursor = db.getMany('traffic', query);
 
     let uniqueUsers = new Set();
@@ -31,7 +31,13 @@ export async function getAggregatedStats(req, res) {
     let topReferers = {};
     let topCountries = {};
     let topEvents = {};
-    let sessionCountries = new Map(); // New map to track unique sessions per country
+    let sessionCountries = new Map();
+    let sessionGeoLocs = new Map(); // Add this line to declare sessionGeoLocs
+    let geoLocCounts = new Map(); // Add this line to count similar geolocations
+    let desktopSessions = 0;
+    let mobileSessions = 0;
+    let unknownDeviceSessions = 0;
+    let processedSessions = new Set();
 
     let pageViewsPerHour = new Array(24).fill(0);
     let pageViewsPerDayOfWeek = new Array(7).fill(0);
@@ -92,28 +98,49 @@ export async function getAggregatedStats(req, res) {
       // calculate page views per year
       const month = parseInt(item.month)-1;
       pageViewsPerMonth[month]++;
+      // caclulate unique geolocations, and count for each geolocation, "geoLoc": "1.2897,103.8501", 
+      if (item.geoLoc) {
+        const [latitude, longitude] = item.geoLoc.split(',');
+        const geoLocKey = `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}`;
+        geoLocCounts.set(geoLocKey, (geoLocCounts.get(geoLocKey) || 0) + 1);
+      } 
+      // Count desktop and mobile sessions
+      if (!processedSessions.has(item.sessionId)) {
+        const deviceType = (item.deviceType || '').toLowerCase();
+        
+        if (deviceType === 'mobile') {
+          mobileSessions++;
+        } else {
+          desktopSessions++;
+        }
+        processedSessions.add(item.sessionId);
+      } 
     });
 
     // Sort all top categories from highest to lowest and limit to top 10
     topPages = Object.fromEntries(
-      Object.entries(topPages).sort((a, b) => b[1] - a[1]).slice(0, 10)
+      Object.entries(topPages).sort((a, b) => b[1] - a[1])
     );
     topReferers = Object.fromEntries(
-      Object.entries(topReferers).sort((a, b) => b[1] - a[1]).slice(0, 10)
+      Object.entries(topReferers).sort((a, b) => b[1] - a[1])
     );
     topCountries = Object.fromEntries(
-      Object.entries(topCountries).sort((a, b) => b[1] - a[1]).slice(0, 10)
+      Object.entries(topCountries).sort((a, b) => b[1] - a[1])
     );
     topEvents = Object.fromEntries(
-      Object.entries(topEvents).sort((a, b) => b[1] - a[1]).slice(0, 10)
+      Object.entries(topEvents).sort((a, b) => b[1] - a[1])
     );
 
     // Calculate average session duration
-    const averageSessionDuration = formatDuration(totalSessionDuration / uniqueUsers.size);
+    const averageSessionDuration = uniqueUsers.size > 0
+      ? formatDuration(totalSessionDuration / uniqueUsers.size)
+      : { hours: "0", minutes: "0", seconds: "0" };
 
     // Calculate bounce rate
     const bouncedSessions = Object.values(sessionCounts).filter(count => count === 1).length;
-    const bounceRate = ((bouncedSessions / uniqueUsers.size) * 100).toFixed(2);
+    const bounceRate = uniqueUsers.size > 0
+      ? ((bouncedSessions / uniqueUsers.size) * 100).toFixed(2)
+      : "0.00";
     
     // convert topReferers to array of {url: 'url', views: 'views'}
     const topReferersArray = Object.entries(topReferers).map(([url, views]) => ({ url, views }));
@@ -123,6 +150,11 @@ export async function getAggregatedStats(req, res) {
     const topEventsArray = Object.entries(topEvents).map(([event, views]) => ({ event, views }));
     //convert topPages to array of {url: 'url', views: 'views'}
     const topPagesArray = Object.entries(topPages).map(([url, views]) => ({ url, views }));
+
+    const geoLocArray = Array.from(geoLocCounts, ([geoloc, count]) => {
+      const [lat, lon] = geoloc.split(',');
+      return { geoloc: { lat: parseFloat(lat), lon: parseFloat(lon) }, count };
+    });
 
     res.json({
       uniqueUsers: uniqueUsers.size,
@@ -138,7 +170,13 @@ export async function getAggregatedStats(req, res) {
       pageViewsPerHour,
       pageViewsPerDayOfWeek,
       pageViewsPerDayOfMonth,
-      pageViewsPerMonth
+      pageViewsPerMonth,
+      sessionGeoLocs,
+      geoLocCounts: geoLocArray,
+      deviceTypes: {
+        desktop: desktopSessions,
+        mobile: mobileSessions
+      }
     });
 
   } catch (error) {
@@ -183,6 +221,7 @@ function urlToBrandName(url) {
     'yandex.ru': 'Yandex',
     'youtube.com': 'YouTube',
     't.co': 'X (Twitter)',
+    'android-app://com.google.android.gm': 'Gmail (Andriod)'
   };
 
   for (const [domain, brand] of Object.entries(brandMap)) {

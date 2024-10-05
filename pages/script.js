@@ -75,9 +75,13 @@ function dashboard() {
         topEvents: [],
         locations: [],
         graphData: {
-            labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
+            labels: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
             data: []
         },        
+        deviceTypes: {
+            desktop: 0,
+            mobile: 0
+        },
         // Add methods to update data based on period changes
 
         async fetchStats() {
@@ -183,9 +187,10 @@ function dashboard() {
                 this.averageSessionDuration = statsData.averageSessionDuration;
                 this.eventCompletions = statsData.totalPageEvents;
                 this.graphData = {
-                    labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
+                    labels: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
                     data: statsData.pageViewsPerHour
                 };
+                this.deviceTypes = statsData.deviceTypes;
             } catch (error) {
                 console.error('Error fetching stats:', error);
                 // Handle error (e.g., show error message to user)
@@ -246,8 +251,19 @@ function dashboard() {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
+                        x: {
+                            type: 'category',
+                            title: {
+                                display: true,
+                                text: 'Hour'
+                            }
+                        },
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Page Views'
+                            }
                         }
                     }
                 }

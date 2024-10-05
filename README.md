@@ -15,12 +15,11 @@ Log
 
 Install auth
 
-Create JWT secrets
+Create JWT secrets. Tip: use uuidgen to create a random secret.
 
 ```
-uuidgen
 coho set-env JWT_ACCESS_TOKEN_SECRET 'xxx' --encrypted
-uuidgen
+
 coho set-env JWT_REFRESH_TOKEN_SECRET 'xxx' --encrypted
 ```
 

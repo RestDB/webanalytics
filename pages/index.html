@@ -49,7 +49,7 @@
         </div>
 
         <!-- Unique Users, Active Users, Bounce Rate, and Avg Time Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-5">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             <!-- Combined Card for Mobile -->
             <div class="card bg-neutral text-neutral-content shadow-xl md:hidden">
                 <div class="card-body">
@@ -71,7 +71,7 @@
                         <tr>
                             <td class="text-base">Bounce</td>
                             <td class="text-base text-right">
-                                <span x-show="!loading" x-text="`${bounceRate} %`"></span>
+                                <span x-show="!loading" x-text="`${bounceRate}&nbsp;%`"></span>
                                 <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                             </td>
                         </tr>
@@ -207,13 +207,38 @@
             </div>
         </div>
 
-        <!-- Top 5 Countries and Top 5 Custom Events -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <!-- Top 5 Countries -->
+        <!-- Top Countries, Devices, Top Custom Events -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+            <!-- Devices -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title">Devices</h2>
+                    <table class="table-auto w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left font-semibold pr-4">Device Type</th>
+                                <th class="text-right font-semibold">People</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-1 pr-4">Desktop</td>
+                                <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.desktop"></td>
+                            </tr>                            
+                            <tr>
+                                <td class="py-1 pr-4">Mobile</td>
+                                <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.mobile"></td>
+                            </tr>                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top Countries -->
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title">Top Countries</h2>
-                    <table class="table-auto">
+                    <table class="table-auto w-full">
                         <thead>
                             <tr>
                                 <th class="text-left font-semibold pr-4">Country</th>
@@ -223,44 +248,36 @@
                         <tbody>
                             <template x-for="country in topCountries" :key="country.country">
                                 <tr>
-                                    <td class="py-1 pr-4">
-                                        <span x-text="country.country"></span>
-                                    </td>
-                                    <td class="text-sm text-gray-500 text-right">
-                                        <span x-text="country.views"></span>
-                                    </td>
+                                    <td class="py-1 pr-4" x-text="country.country"></td>
+                                    <td class="text-sm text-gray-500 text-right" x-text="country.views"></td>
                                 </tr>
                             </template>
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div>            
+        </div>
 
-            <!-- Top 5 Custom Events -->
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h2 class="card-title">Top 5 Custom Events</h2>
-                    <table class="table-auto">
-                        <thead>
+        <!-- Top Custom Events -->
+        <div class="card bg-base-100 shadow-xl mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Top Custom Events</h2>
+                <table class="table-auto w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left font-semibold pr-4">Event</th>
+                            <th class="text-right font-semibold">Views</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="event in topEvents" :key="event.event">
                             <tr>
-                                <th class="text-left font-semibold pr-4">Event</th>
-                                <th class="text-right font-semibold">Views</th>
+                                <td class="py-1 pr-4" x-text="event.event"></td>
+                                <td class="text-sm text-gray-500 text-right" x-text="event.views"></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="event in topEvents" :key="event.event">
-                                <tr>
-                                    <td class="py-1 pr-4">
-                                        <span x-text="event.event"></span>
-                                    </td>
-                                    <td class="text-sm text-gray-500 text-right">
-                                        <span x-text="event.views"></span>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
+                        </template>
+                    </tbody>
+                </table>
             </div>
         </div>
 
