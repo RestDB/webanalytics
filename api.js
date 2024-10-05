@@ -2,6 +2,24 @@ import { datastore, aggregation } from 'codehooks-js'
 import get from 'lodash/get';
 import { formatDuration } from './utils.js';
 
+// Add this function at the top of the file or in a utility module
+function normalizeUrl(url, domain) {
+  // Remove protocol (http:// or https://)
+  url = url.replace(/^https?:\/\//, '');
+  
+  // Remove www. if present
+  url = url.replace(/^www\./, '');
+  
+  // Remove trailing slash if present
+  url = url.replace(/\/$/, '');
+  
+  // If the URL starts with the domain, keep only the path
+  if (url.startsWith(domain)) {
+    url = url.substring(domain.length) || '/';
+  }
+  
+  return url;
+}
 
 /*
 Aggregated stats
@@ -65,7 +83,8 @@ export async function getAggregatedStats(req, res) {
       }
       // calculate top pages
       if (item.referer) {
-        topPages[item.referer] = (topPages[item.referer] || 0) + 1;
+        const normalizedReferer = normalizeUrl(item.referer, domain);
+        topPages[normalizedReferer] = (topPages[normalizedReferer] || 0) + 1;
       }
       // calculate top referrers
       if (item.via) {
@@ -221,7 +240,7 @@ function urlToBrandName(url) {
     'yandex.ru': 'Yandex',
     'youtube.com': 'YouTube',
     't.co': 'X (Twitter)',
-    'android-app://com.google.android.gm': 'Gmail (Andriod)'
+    'android-app://com.google.android.gm': 'Gmail (Android)'
   };
 
   for (const [domain, brand] of Object.entries(brandMap)) {
