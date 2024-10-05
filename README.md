@@ -71,6 +71,10 @@ curl --location 'https://your-coho-app-url.codehooks.io/auth/createuser' \
     "password": "SecurePassword123!"
 }'
 ```
+Tip: create a secure password using `openssl`
+```
+openssl rand -base64 32
+```
 
 Replace `YOUR_API_KEY` with the token you created earlier.
 
@@ -79,7 +83,7 @@ Replace `YOUR_API_KEY` with the token you created earlier.
 Add the following script tag to your website's HTML:
 
 ```html
-<script src="https://your-app-url.com/analytics-script.js"></script>
+<script src="https://your-coho-app-url.codehooks.io|your-domain.com/analytics-script.js"></script>
 ```
 
 ## API Documentation
@@ -105,6 +109,7 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
 #### Headers:
 
 - `Authorization`: Bearer token (JWT)
+- Or
 - `x-apikey`: Your API key
 
 #### Response:
@@ -146,7 +151,7 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
   "pageViewsPerDayOfMonth": [0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   "pageViewsPerMonth": [0, 0, 0, 0, 0, 0, 0, 0, 0, 199, 0, 0],
   "deviceTypes": {
-    "desktop": 37,****
+    "desktop": 37,
     "mobile": 8
   },
   "geoLocCounts": [
