@@ -75,7 +75,7 @@ function dashboard() {
         topEvents: [],
         locations: [],
         graphData: {
-            labels: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
+            labels: [],
             data: []
         },        
         deviceTypes: {
@@ -103,16 +103,17 @@ function dashboard() {
                 const twoDaysAgoStr = twoDaysAgo.toISOString();
                 const twoDaysAgoEndStr = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate()) - 1).toISOString();
 
-                // One week ago: [7 days ago start of day, current time] in UTC
-                const oneWeekAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
+                // One week ago: [start of current week, current time] in UTC
+                const oneWeekAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+                oneWeekAgo.setUTCDate(oneWeekAgo.getUTCDate() - oneWeekAgo.getUTCDay() + 1); // Adjust to Monday
                 const oneWeekAgoStr = oneWeekAgo.toISOString();
 
-                // One month ago: [1 month ago start of day, current time] in UTC
-                const oneMonthAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, today.getUTCDate()));
+                // One month ago: [1 month ago start of month, current time] in UTC
+                const oneMonthAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
                 const oneMonthAgoStr = oneMonthAgo.toISOString();
 
-                // One year ago: [1 year ago start of day, current time] in UTC
-                const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear() - 1, today.getUTCMonth(), today.getUTCDate()));
+                // One year ago: [start of previous year, current time] in UTC
+                const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
                 const oneYearAgoStr = oneYearAgo.toISOString();
 
                 let fromPeriodStr = '';
@@ -164,18 +165,36 @@ function dashboard() {
                     responses.map(response => response.json())
                 );
 
+                // Update graphData labels based on the period
+                switch (this.period) {
+                    case 'day':
+                        this.graphData.labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+                        break;
+                    case 'week':
+                        this.graphData.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        break;
+                    case 'month':
+                        this.graphData.labels = Array.from({length: 31}, (_, i) => (i + 1).toString());
+                        break;
+                    case 'year':
+                        this.graphData.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        break;
+                    default:
+                        this.graphData.labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+                }
+
                 // Update the component state
                 this.uniqueUsers = statsData.uniqueUsers;
                 this.totalPageViews = statsData.totalPageViews;
-                this.topReferers = statsData.topReferers.map(x => {
+                this.topReferers = statsData.topReferers.slice(0, 10).map(x => {
                     return {
                         url: (x.url),
                         views: x.views
                     }
                 });
-                this.topCountries = statsData.topCountries;
+                this.topCountries = statsData.topCountries.slice(0, 10);
                 this.topEvents = statsData.topEvents;
-                this.topPages = statsData.topPages.map(x => {
+                this.topPages = statsData.topPages.slice(0, 10).map(x => {
                     return {
                         url: x.url.replace('https://codehooks.io', ''),
                         views: x.views
@@ -187,8 +206,19 @@ function dashboard() {
                 this.averageSessionDuration = statsData.averageSessionDuration;
                 this.eventCompletions = statsData.totalPageEvents;
                 this.graphData = {
-                    labels: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
-                    data: statsData.pageViewsPerHour
+                    labels: this.graphData.labels,
+                    data: (() => {
+                        switch (this.period) {
+                            case 'week':
+                                return statsData.pageViewsPerDayOfWeek;
+                            case 'month':
+                                return statsData.pageViewsPerDayOfMonth;
+                            case 'year':
+                                return statsData.pageViewsPerMonth;
+                            default:
+                                return statsData.pageViewsPerHour;
+                        }
+                    })()
                 };
                 this.deviceTypes = statsData.deviceTypes;
             } catch (error) {
@@ -255,15 +285,12 @@ function dashboard() {
                             type: 'category',
                             title: {
                                 display: true,
-                                text: 'Hour'
+                                text: this.period
                             }
                         },
                         y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Page Views'
-                            }
+                            beginAtZero: true
+                            
                         }
                     }
                 }
@@ -289,33 +316,3 @@ function initMap() {
 
 // Initialize the map when the page loads
 document.addEventListener('DOMContentLoaded', initMap);
-
-function urlToBrandName(url) {
-    const brandMap = {
-      'baidu.com': 'Baidu',
-      'bing.com': 'Bing',
-      'duckduckgo.com': 'DuckDuckGo',
-      'devhunt.org': 'DevHunt',
-      'facebook.com': 'Facebook',
-      'github.com': 'GitHub',
-      'google.com': 'Google',
-      'instagram.com': 'Instagram',
-      'linkedin.com': 'LinkedIn',
-      'pinterest.com': 'Pinterest',
-      'reddit.com': 'Reddit',
-      'snapchat.com': 'Snapchat',
-      'tiktok.com': 'TikTok',
-      'twitter.com': 'Twitter',
-      'whatsapp.com': 'WhatsApp',
-      'yahoo.com': 'Yahoo',
-      'yandex.ru': 'Yandex',
-      'youtube.com': 'YouTube',
-    };
-  
-    for (const [domain, brand] of Object.entries(brandMap)) {
-      if (url.includes(domain)) {
-        return brand;
-      }
-    }
-    return url;
-  }
