@@ -183,24 +183,26 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
 
 #### Response Fields:
 
-- `uniqueUsers`: Number of unique visitors
-- `totalPageViews`: Total number of page views in the date range
-- `uniqueEvents`: Number of unique event types
-- `totalPageEvents`: Total number of events triggered
-- `averageSessionDuration`: Average time on site in hours, minutes, and seconds
-- `bounceRate`: Bounce rate as a percentage
-- `topPages`: Array of top pages with their view counts
-- `topReferers`: Array of top referrers with their view counts
-- `topCountries`: Array of top countries with their view counts
-- `topEvents`: Array of top events with their trigger counts
-- `pageViewsPerHour`: Array of page views for each hour (0-23)
-- `pageViewsPerDayOfWeek`: Array of page views for each day of the week (0-6, where 0 is Sunday)
-- `pageViewsPerDayOfMonth`: Array of page views for each day of the month (1-31)
-- `pageViewsPerMonth`: Array of page views for each month (0-11, where 0 is January)
-- `deviceTypes`: Breakdown of visits by device type
-- `geoLocCounts`: Array of geolocation data with view counts
-  - `geoloc`: Object containing latitude and longitude
-  - `count`: Number of views from this location
+| Field | Description |
+|-------|-------------|
+| `uniqueUsers` | Number of unique visitors |
+| `totalPageViews` | Total number of page views in the date range |
+| `uniqueEvents` | Number of unique event types |
+| `totalPageEvents` | Total number of events triggered |
+| `averageSessionDuration` | Average time on site in hours, minutes, and seconds |
+| `bounceRate` | Bounce rate as a percentage |
+| `topPages` | Array of top pages with their view counts |
+| `topReferers` | Array of top referrers with their view counts |
+| `topCountries` | Array of top countries with their view counts |
+| `topEvents` | Array of top events with their trigger counts |
+| `pageViewsPerHour` | Array of page views for each hour (0-23) |
+| `pageViewsPerDayOfWeek` | Array of page views for each day of the week (0-6, where 0 is Sunday) |
+| `pageViewsPerDayOfMonth` | Array of page views for each day of the month (1-31) |
+| `pageViewsPerMonth` | Array of page views for each month (0-11, where 0 is January) |
+| `deviceTypes` | Breakdown of visits by device type |
+| `geoLocCounts` | Array of geolocation data with view counts |
+| `geoLocCounts.geoloc` | Object containing latitude and longitude |
+| `geoLocCounts.count` | Number of views from this location |
 
 #### Error Responses:
 
