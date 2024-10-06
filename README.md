@@ -10,11 +10,20 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
 - Real-time analytics dashboard
 - Easy integration with your existing websites
 
+## Screenshots
+Users can signup and login using the NPM package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth)
+
+![Screenshot 1](screenshots/signin.png)
+
+The dashboard provides an overview of the website traffic and user interactions.
+
+![Screenshot 2](screenshots/dashboard.png)
+
 ## Prerequisites
 
 - Node.js (v14 or later)
 - npm (v6 or later)
-- [Coho](https://coho.io/) account for backend services
+- [Codehooks.io](https://codehooks.io/) account for backend services
 
 ## Installation
 
@@ -29,6 +38,11 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
    npm install
    ```
 
+3. Create a new project at [codehooks.io](https://codehooks.io/) and get attach to your project.
+  ```
+  coho init --empty
+  ```
+
 ## Configuration
 
 1. Set up JWT secrets for authentication:
@@ -36,7 +50,7 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
    coho set-env JWT_ACCESS_TOKEN_SECRET 'your_access_token_secret' --encrypted
    coho set-env JWT_REFRESH_TOKEN_SECRET 'your_refresh_token_secret' --encrypted
    ```
-   Tip: Use `uuidgen` to generate random secrets.
+   Tip: Use [`uuidgen`](https://man7.org/linux/man-pages/man1/uuidgen.1.html) to generate random secrets.
 
 2. Create a new API key:
    ```
@@ -83,7 +97,7 @@ Replace `YOUR_API_KEY` with the token you created earlier.
 Add the following script tag to your website's HTML:
 
 ```html
-<script src="https://your-coho-app-url.codehooks.io|your-domain.com/analytics-script.js"></script>
+<script src="https://your-coho-app-url.codehooks.io/analytics-script.js"></script>
 ```
 
 ## API Documentation
@@ -210,3 +224,56 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 If you encounter any issues or have questions, please file an issue on our [GitHub issue tracker](https://github.com/yourusername/webanalytics/issues).
+
+## Environment Variables
+
+### IPINFO_TOKEN
+
+The `IPINFO_TOKEN` is an environment variable used to authenticate requests to the IPInfo API. This token is required to fetch geolocation data based on IP addresses.
+
+To set up the `IPINFO_TOKEN`:
+
+1. Sign up for an account at [ipinfo.io](https://ipinfo.io/). They offer a free tier that should be more than enough for personal use.
+2. Obtain your API token from your account dashboard
+3. Set the environment variable in your project:
+   - Use the Studio interface to set the environment variable
+   -Or use the CLI:
+     ```
+     coho set-env IPINFO_TOKEN 'your_token_here' --encrypted
+     ```
+
+Make sure to keep your API token secret and never commit it to version control.
+
+The `IPINFO_TOKEN` is used in the `getCountryFromIP` function in `utils.js` to authenticate requests to the IPInfo API.
+
+### JWT_ACCESS_TOKEN_SECRET
+
+The `JWT_ACCESS_TOKEN_SECRET` is an environment variable used to sign and verify JSON Web Tokens (JWTs) for user authentication.
+
+To set up the `JWT_ACCESS_TOKEN_SECRET`:
+
+1. Generate a secure random string. You can use the `uuidgen` command or a similar method to create a strong secret.
+2. Set the environment variable in your project:
+   ```
+   coho set-env JWT_ACCESS_TOKEN_SECRET 'your_access_token_secret' --encrypted
+   ```
+
+Make sure to keep this secret secure and never commit it to version control.
+
+The `JWT_ACCESS_TOKEN_SECRET` is used in the authentication process to sign JWTs when users log in and to verify JWTs when accessing protected routes.
+
+### JWT_REFRESH_TOKEN_SECRET
+
+The `JWT_REFRESH_TOKEN_SECRET` is an environment variable used to sign and verify refresh tokens for user authentication.
+
+To set up the `JWT_REFRESH_TOKEN_SECRET`:
+
+1. Generate a secure random string. You can use the `uuidgen` command or a similar method to create a strong secret.
+2. Set the environment variable in your project:
+   ```
+   coho set-env JWT_REFRESH_TOKEN_SECRET 'your_refresh_token_secret' --encrypted
+   ```
+
+Make sure to keep this secret secure and never commit it to version control.
+
+The `JWT_REFRESH_TOKEN_SECRET` is used in the authentication process to sign refresh tokens when users log in and to verify refresh tokens when issuing new access tokens.

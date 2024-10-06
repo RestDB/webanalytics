@@ -47,6 +47,7 @@
             <a class="tab" :class="{ 'tab-active': period === 'day' }" @click="period = 'day'; updateStats()">Today</a>
             <a class="tab" :class="{ 'tab-active': period === 'yesterday' }" @click="period = 'yesterday'; updateStats()">Yesterday</a>
             <a class="tab" :class="{ 'tab-active': period === 'week' }" @click="period = 'week'; updateStats()">Week</a>
+            <a class="tab" :class="{ 'tab-active': period === 'lastweek' }" @click="period = 'lastweek'; updateStats()">Last Week</a>
             <a class="tab" :class="{ 'tab-active': period === 'month' }" @click="period = 'month'; updateStats()">Month</a>
             <a class="tab" :class="{ 'tab-active': period === 'year' }" @click="period = 'year'; updateStats()">Year</a>
         </div>

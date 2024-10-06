@@ -105,8 +105,13 @@ function dashboard() {
 
                 // One week ago: [start of current week, current time] in UTC
                 const oneWeekAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-                oneWeekAgo.setUTCDate(oneWeekAgo.getUTCDate() - oneWeekAgo.getUTCDay() + 1); // Adjust to Monday
+                oneWeekAgo.setUTCDate(oneWeekAgo.getUTCDate() - oneWeekAgo.getUTCDay()); // Adjust to Monday
                 const oneWeekAgoStr = oneWeekAgo.toISOString();
+                
+                // Two weeks ago: [start of current week, current time] in UTC
+                const twoWeeksAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+                twoWeeksAgo.setUTCDate(twoWeeksAgo.getUTCDate() - oneWeekAgo.getUTCDay() - 6); // Adjust to Monday
+                const twoWeeksAgoStr = twoWeeksAgo.toISOString();
 
                 // One month ago: [1 month ago start of month, current time] in UTC
                 const oneMonthAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
@@ -131,6 +136,10 @@ function dashboard() {
                     case 'week':
                         fromPeriodStr = oneWeekAgoStr;
                         toPeriodStr = nowStr;
+                        break;
+                    case 'lastweek':
+                        fromPeriodStr = twoWeeksAgoStr;
+                        toPeriodStr = oneWeekAgoStr;
                         break;
                     case 'month':
                         fromPeriodStr = oneMonthAgoStr;
@@ -167,11 +176,11 @@ function dashboard() {
 
                 // Update graphData labels based on the period
                 switch (this.period) {
-                    case 'day':
-                        this.graphData.labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-                        break;
                     case 'week':
-                        this.graphData.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        this.graphData.labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        break;
+                    case 'lastweek':
+                        this.graphData.labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                         break;
                     case 'month':
                         this.graphData.labels = Array.from({length: 31}, (_, i) => (i + 1).toString());

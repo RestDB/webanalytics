@@ -5,9 +5,7 @@ import { app, datastore } from 'codehooks-js'
 import analyticsScript from './analytics-script.js';
 import { aggregateWorker, trackerWorker } from './workers.js';
 import { mapRoute } from './map.js';
-import get from 'lodash/get';
-import { formatDuration } from './utils.js';
-import { getEventCompletions, getViewStats, getTopPages, getTopReferers, getTrafficData, getAggregatedStats } from './api.js';
+import { getAggregatedStats, createStats } from './api.js';
 import { generatePixel } from './utils.js';
 import { initAuth } from 'codehooks-auth'
 
@@ -81,6 +79,7 @@ app.static({route: '/dashboard', directory: '/pages', default: 'index.html'})
   Data API
 */
 app.get('/api/aggstats/:from/:to', getAggregatedStats);
+app.post('/api/stats', createStats);
 /* 
   Bind application to serverless runtime
 */

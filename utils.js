@@ -12,7 +12,7 @@ export async function getCountryFromIP(ip) {
         console.debug('Cached IP', cachedIp)
         return JSON.parse(cachedIp)
       }
-      const apiToken = '506fec00701249'
+      const apiToken = process.env.IPINFO_TOKEN;
       const requestOptions = {
         method: "GET",
         redirect: "follow"
