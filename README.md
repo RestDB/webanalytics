@@ -38,10 +38,10 @@ The dashboard provides an overview of the website traffic and user interactions.
    npm install
    ```
 
-3. Create a new project at [codehooks.io](https://codehooks.io/) and get attach to your project.
-  ```
-  coho init --empty
-  ```
+3. Create a new project at [codehooks.io](https://codehooks.io/) and get attached to your project.
+   ```
+   coho init --empty
+   ```
 
 ## Configuration
 
