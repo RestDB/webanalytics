@@ -85,7 +85,7 @@ curl --location 'https://your-coho-app-url.codehooks.io/auth/createuser' \
     "password": "SecurePassword123!"
 }'
 ```
-Tip: create a secure password using `openssl`
+Tip: create a secure password using [`openssl`](https://www.openssl.org/docs/man1.0.2/man1/openssl.html)
 ```
 openssl rand -base64 32
 ```
@@ -97,7 +97,7 @@ Replace `YOUR_API_KEY` with the token you created earlier.
 Add the following script tag to your website's HTML:
 
 ```html
-<script src="https://your-coho-app-url.codehooks.io/analytics-script.js"></script>
+<script src="https://your-coho-app-url.codehooks.io/script.js"></script>
 ```
 
 ## API Documentation
@@ -110,8 +110,8 @@ This endpoint provides aggregated statistics for a specified date range.
 
 #### Parameters:
 
-- `from`: Start date (inclusive) in ISO 8601 format (e.g., "2023-04-01")
-- `to`: End date (inclusive) in ISO 8601 format (e.g., "2023-04-30")
+- `from`: Start date (inclusive) in ISO 8601 format (e.g., "2023-04-01T00")
+- `to`: End date (inclusive) in ISO 8601 format (e.g., "2023-04-30T23:59")
 - `domain`: (Query parameter) The domain to filter statistics for (e.g., "codehooks.io")
 
 #### Request:
