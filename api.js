@@ -61,9 +61,8 @@ export async function createStats(req, res) {
   try {
     const { body } = req;
     const db = await datastore.open();
-    const collection = db.getCollection('stats');
-    await collection.insertOne(body);
-    res.json(body);
+    await db.insertOne('traffic', body);
+    res.status(201).json(body);
   } catch (error) {
     console.error('Error in createStats:', error.message);  
     res.status(500).json({ error: 'Internal Server Error' });

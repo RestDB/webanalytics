@@ -65,11 +65,12 @@ The dashboard provides an overview of the website traffic and user interactions.
 
 ## Usage
 
-### Running the Application
+### Deploying the Application
 
-Start the development server:
+Deploy the application to the cloud:
+
 ```
-npm run dev
+npm run deploy
 ```
 
 ### Creating a New User
@@ -100,9 +101,28 @@ Add the following script tag to your website's HTML:
 <script src="https://your-coho-app-url.codehooks.io/script.js"></script>
 ```
 
+## The Dashboard Application
+
+The dashboard application is an [Alpine.js](https://alpinejs.dev/) application that provides a detailed view of the website traffic and user interactions. It is deployed with the rest of the app under the `/dashboard` route:
+
+```js
+app.static({route: '/dashboard', directory: '/pages', default: 'index.html'})
+```
+
+The source code can be found under the `pages` directory.
+
+```
+pages
+├── index.html
+├── input.css
+├── output.css
+└── script.js
+```
+
+
 ## API Documentation
 
-### Aggregated Statistics
+### Get aggregated Statistics
 
 Endpoint: `GET /api/aggstats/:from/:to`
 
@@ -210,6 +230,51 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
 - 401 Unauthorized: Missing or invalid authentication
 - 403 Forbidden: Insufficient permissions
 - 500 Internal Server Error: Server-side error
+
+### Post Traffic Data programmatically
+
+Endpoint: `POST /api/stats`
+
+This endpoint allows you to post traffic data programmatically.
+
+#### Parameters:  
+
+- `domain`: (Query parameter) The domain to filter statistics for (e.g., "codehooks.io")
+- `data`: (Body parameter) The traffic data to post in JSON format
+
+#### Request:
+
+```
+POST https://your-coho-app-url.codehooks.io/api/stats?domain=codehooks.io
+Content-Type: application/json
+
+{
+  "data": {
+    "referer": "https://example.com/login",
+    "event": "Login",
+    "eventData": {
+      "username": "user@example.com"
+    }
+  }
+}
+```
+
+#### Response:
+
+```
+HTTP/1.1 201 OK
+Content-Type: application/json
+
+{
+  "_id": "1234567890",
+  "referer": "https://example.com/login",
+  "event": "Login",
+  "eventData": {
+    "username": "user@example.com"
+  },
+  "timestamp": "2024-02-14T12:34:56Z"
+}
+``` 
 
 ## Dashboard
 
