@@ -215,17 +215,6 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
 
 Access your analytics dashboard at `https://your-coho-app-url.codehooks.io | your-domain.com/dashboard`
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for more details.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-If you encounter any issues or have questions, please file an issue on our [GitHub issue tracker](https://github.com/yourusername/webanalytics/issues).
 
 ## Environment Variables
 
@@ -279,3 +268,15 @@ To set up the `JWT_REFRESH_TOKEN_SECRET`:
 Make sure to keep this secret secure and never commit it to version control.
 
 The `JWT_REFRESH_TOKEN_SECRET` is used in the authentication process to sign refresh tokens when users log in and to verify refresh tokens when issuing new access tokens.
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for more details.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+If you encounter any issues or have questions, please file an issue on our [GitHub issue tracker](https://github.com/yourusername/webanalytics/issues).
