@@ -23,7 +23,7 @@ The dashboard provides an overview of the website traffic and user interactions.
 
 - Node.js (v14 or later)
 - npm (v6 or later)
-- [Codehooks.io](https://codehooks.io/) account for backend services
+- A [Codehooks.io](https://codehooks.io/) account for backend services
 
 ## Installation
 
@@ -90,7 +90,7 @@ Tip: create a secure password using [`openssl`](https://www.openssl.org/docs/man
 openssl rand -base64 32
 ```
 
-Replace `YOUR_API_KEY` with the token you created earlier.
+Replace `YOUR_API_KEY` with your project API token. Check the [docs](https://www.codehooks.io/docs/authentication#app-to-app-authentication-with-api-tokens) on how to create an API token.
 
 ### Integrating Analytics Script
 
