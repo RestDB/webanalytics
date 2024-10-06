@@ -11,7 +11,7 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
 - Easy integration with your existing websites
 
 ## Screenshots
-Users can signup and login using the NPM package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth)
+User authentication is solved by using the NPM package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth)
 
 ![Screenshot 1](screenshots/signin.png)
 
@@ -93,7 +93,7 @@ openssl rand -base64 32
 
 Replace `YOUR_API_KEY` with your project API token. Check the [docs](https://www.codehooks.io/docs/authentication#app-to-app-authentication-with-api-tokens) on how to create an API token.
 
-### Integrating Analytics Script
+### Integrating the Web Analytics Client JavaScript
 
 Add the following script tag to your website's HTML:
 
@@ -103,7 +103,7 @@ Add the following script tag to your website's HTML:
 
 ## The Dashboard Application
 
-The dashboard application is an [Alpine.js](https://alpinejs.dev/) application that provides a detailed view of the website traffic and user interactions. It is deployed with the rest of the app under the `/dashboard` route:
+The dashboard application is an [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) application that provides a detailed view of the website traffic and user interactions. It is deployed with the rest of the app under the `/dashboard` route:
 
 ```js
 app.static({route: '/dashboard', directory: '/pages', default: 'index.html'})
