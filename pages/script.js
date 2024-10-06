@@ -73,7 +73,7 @@ function dashboard() {
         topReferers: [],
         topCountries: [],
         topEvents: [],
-        locations: [],
+        geoLocCounts: [],
         graphData: {
             labels: [],
             data: []
@@ -117,6 +117,11 @@ function dashboard() {
                 const oneMonthAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
                 const oneMonthAgoStr = oneMonthAgo.toISOString();
 
+                // Two months ago: [2 months ago start of month, current time] in UTC
+                const twoMonthsAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+                twoMonthsAgo.setUTCMonth(twoMonthsAgo.getUTCMonth() - 1);
+                const twoMonthsAgoStr = twoMonthsAgo.toISOString(); 
+
                 // One year ago: [start of previous year, current time] in UTC
                 const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
                 const oneYearAgoStr = oneYearAgo.toISOString();
@@ -144,6 +149,10 @@ function dashboard() {
                     case 'month':
                         fromPeriodStr = oneMonthAgoStr;
                         toPeriodStr = nowStr;
+                        break;
+                    case 'lastmonth':
+                        fromPeriodStr = twoMonthsAgoStr;
+                        toPeriodStr = oneMonthAgoStr;
                         break;
                     case 'year':
                         fromPeriodStr = oneYearAgoStr;
@@ -185,6 +194,9 @@ function dashboard() {
                     case 'month':
                         this.graphData.labels = Array.from({length: 31}, (_, i) => (i + 1).toString());
                         break;
+                    case 'lastmonth':
+                        this.graphData.labels = Array.from({length: 31}, (_, i) => (i + 1).toString());
+                        break;
                     case 'year':
                         this.graphData.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                         break;
@@ -222,6 +234,8 @@ function dashboard() {
                                 return statsData.pageViewsPerDayOfWeek;
                             case 'month':
                                 return statsData.pageViewsPerDayOfMonth;
+                            case 'lastmonth':
+                                return statsData.pageViewsPerDayOfMonth;
                             case 'year':
                                 return statsData.pageViewsPerMonth;
                             default:
@@ -230,6 +244,7 @@ function dashboard() {
                     })()
                 };
                 this.deviceTypes = statsData.deviceTypes;
+                this.geoLocCounts = statsData.geoLocCounts.map(x => {return {lat: x.geoloc.lat, lon: x.geoloc.lon, count: x.count}});
             } catch (error) {
                 console.error('Error fetching stats:', error);
                 // Handle error (e.g., show error message to user)
@@ -249,6 +264,7 @@ function dashboard() {
             try {                
                 await this.fetchStats();
                 this.initTrafficGraph();
+                this.initMap();
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -305,23 +321,84 @@ function dashboard() {
                 }
             });
         },
+        initMap() {
+            console.log('initMap');
+            // Check if the map instance already exists
+            if (this.mapInstance) {
+                // If it exists, remove the existing map
+                this.mapInstance.remove();
+            }
+
+            var cfg = {
+                // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+                "radius": 1,
+                "maxOpacity": .20,
+                // scales the radius based on map zoom
+                "scaleRadius": true,
+                // if set to false the heatmap uses the global maximum for colorization
+                // if activated: uses the data maximum within the current map boundaries
+                //   (there will always be a red spot with useLocalExtremas true)
+                "useLocalExtrema": false,
+                // which field name in your data represents the latitude - default "lat"
+                latField: 'lat',
+                // which field name in your data represents the longitude - default "lng"
+                lngField: 'lon',
+                // which field name in your data represents the data value - default "value"
+                valueField: 'count'
+            };
+
+
+            var heatmapLayer = new HeatmapOverlay(cfg);
+
+            var baseLayer = L.tileLayer(
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap for Codehooks</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+                    maxZoom: 18
+                }
+            );
+
+            // Create a new map instance
+            this.mapInstance = new L.Map('world_map', {            
+                layers: [baseLayer, heatmapLayer],
+                center: [48.8566, 2.3522], // Coordinates for Paris
+                zoom: 3 // Adjust this value to set the initial zoom level
+            });
+
+            // Create a bounds object to adjust the map view based on locations
+            const bounds = L.latLngBounds();
+            
+            
+            if (this.geoLocCounts.length > 0) {
+                const bounds = L.latLngBounds();
+                this.geoLocCounts.forEach((geoData) => {
+                    const location = L.latLng(geoData.lat, geoData.lon);
+                    bounds.extend(location);
+
+                    // Create the circle
+                    L.circle(location, {
+                        color: 'black',
+                        fillColor: '#30f',
+                        fillOpacity: 0.1,
+                        radius: 1000
+                    }).addTo(this.mapInstance);
+                    
+                });
+
+                // Fit the map to the bounds of all markers
+                //this.mapInstance.fitBounds(bounds);
+                heatmapLayer.setData({data: this.geoLocCounts});
+                //this.mapInstance.addLayer(heatmapLayer);
+            }
+            
+        },
 
         init() {
             this.updateStats();
             this.initTrafficGraph();
+            this.initMap();
         }
     }
 }
 
-function initMap() {
-    console.log('initMap');
-    var map = L.map('world_map').setView([51.505, -0.09], 6);
-    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap for Codehooks.io</a>'
-	}).addTo(map);
-
-}
-
 // Initialize the map when the page loads
-document.addEventListener('DOMContentLoaded', initMap);
+//document.addEventListener('DOMContentLoaded', initMap);

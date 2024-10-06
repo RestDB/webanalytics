@@ -13,7 +13,9 @@
      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <script src="heatmap.min.js"></script>
+     <script src="leaflet-heatmap.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .leaflet-container {
@@ -49,6 +51,7 @@
             <a class="tab" :class="{ 'tab-active': period === 'week' }" @click="period = 'week'; updateStats()">Week</a>
             <a class="tab" :class="{ 'tab-active': period === 'lastweek' }" @click="period = 'lastweek'; updateStats()">Last Week</a>
             <a class="tab" :class="{ 'tab-active': period === 'month' }" @click="period = 'month'; updateStats()">Month</a>
+            <a class="tab" :class="{ 'tab-active': period === 'lastmonth' }" @click="period = 'lastmonth'; updateStats()">Last Month</a>
             <a class="tab" :class="{ 'tab-active': period === 'year' }" @click="period = 'year'; updateStats()">Year</a>
         </div>
 
