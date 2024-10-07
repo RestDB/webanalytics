@@ -11,13 +11,18 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
 - Easy integration with your existing websites
 
 ## Screenshots
-User authentication is solved by using the NPM package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth)
-
-![Screenshot 1](screenshots/signin.png)
 
 The dashboard provides an overview of the website traffic and user interactions.
 
-![Screenshot 2](screenshots/dashboard.png)
+![Screenshot 1](screenshots/dashboard.png)
+
+The heatmap shows you where your users are clicking on a world map by the open source solution [OpenLayers](https://openlayers.org/).
+
+![Screenshot 2](screenshots/heatmap.png)
+
+Secure user/password authentication by the open source  package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth)
+
+![Screenshot 3](screenshots/signin.png)
 
 ## Prerequisites
 
@@ -98,7 +103,7 @@ Replace `YOUR_API_KEY` with your project API token. Check the [docs](https://www
 Add the following script tag to your website's HTML:
 
 ```html
-<script src="https://your-coho-app-url.codehooks.io/script.js"></script>
+<script src="https://your-coho-app-url.codehooks.io/script.js" referrerpolicy="no-referrer-when-downgrade"></script>
 ```
 
 ## The Dashboard Application
@@ -113,10 +118,9 @@ The source code can be found under the `pages` directory.
 
 ```
 pages
-├── index.html
-├── input.css
-├── output.css
-└── script.js
+├── index.html // Dashboard
+├── output.css // TailwindCSS
+└── script.js  // Alpine.js and API queries for traffic data
 ```
 
 
