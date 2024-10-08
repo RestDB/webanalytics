@@ -41,6 +41,7 @@ export const trackerWorker = async (workerdata, work) => {
           deviceVendor: userAgentInfo.device.vendor,
           deviceModel: userAgentInfo.device.model,
           deviceType: userAgentInfo.device.type,
+          browserName: userAgentInfo.browser.name,
           referer: headers['referer'] ? headers['referer'].split('?')[0] : undefined,
           campaign: undefined,
           campaignSource: undefined,

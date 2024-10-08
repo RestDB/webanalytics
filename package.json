@@ -4,7 +4,8 @@
   "description": "Codehooks backend app",
   "main": "index.js",
   "scripts": {
-    "deploy": "codehooks deploy && codehooks logs --follow"
+    "css": "tailwindcss -i ./pages/input.css -o ./pages/output.css",
+    "deploy": "npm run css && codehooks deploy && codehooks logs --follow"
   },
   "author": "jones@codehooks.io",
   "license": "ISC",

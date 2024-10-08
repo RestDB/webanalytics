@@ -62,14 +62,17 @@ app.worker('TRACKER', trackerWorker);
 */
 app.worker('AGGREGATE', aggregateWorker);
 
-/*
-  Web map page
-*/
-app.get('/map', mapRoute);
 
 /*
 Serve static assets
 */
+
+// route root to dashboard
+app.auth('/', (req, res, next) => next());
+app.get('/', (req, res) => {
+  res.redirect('/dashboard/index.html');
+});
+
 // setup auth settings
 initAuth(app, settings)
 app.static({route: '/auth', directory: '/auth/assets', default: 'login.html'})

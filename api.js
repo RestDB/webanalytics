@@ -74,10 +74,13 @@ Aggregated stats
 */
 export async function getAggregatedStats(req, res) {
   try {
-    const { domain } = req.query;
+    let { domain, query } = req.query;
     const { from, to } = req.params;
-    
-    const stats = await calculateAggregatedStats(from, to, domain);
+    if (query) {
+      query = JSON.parse(query);
+      console.log('query', query);
+    }
+    const stats = await calculateAggregatedStats(from, to, domain, query);
     res.json(stats);
   } catch (error) {
     console.error('Error in getAggregatedStats:', error.message);
@@ -85,14 +88,18 @@ export async function getAggregatedStats(req, res) {
   }
 }
 
-async function calculateAggregatedStats(from, to, domain) {
-  const query = {
+async function calculateAggregatedStats(from, to, domain, inputquery) {
+  let query = {
     domain,
     timestamp: {
       $gte: from,
       $lte: to
     }
   };
+  // merge query with inputquery
+  if (inputquery) {
+    query = { ...query, ...inputquery };
+  }
   const db = await datastore.open();
   const cursor = db.getMany('traffic', query);
 
@@ -116,6 +123,7 @@ async function calculateAggregatedStats(from, to, domain) {
   let pageViewsPerDayOfWeek = new Array(7).fill(0);
   let pageViewsPerDayOfMonth = new Array(31).fill(0);
   let pageViewsPerMonth = new Array(12).fill(0);
+  let pageViewsInPeriod = {};
 
   await cursor.forEach((item) => {
     // Calculate unique users and total page views
@@ -146,7 +154,6 @@ async function calculateAggregatedStats(from, to, domain) {
       if (item.via.indexOf(domain) > 0) {
         item.via = 'Direct';
       }
-      item.via = urlToBrandName(item.via);
       topReferers[item.via] = (topReferers[item.via] || 0) + 1;
     }
     // calculate top countries (unique sessions per country)
@@ -160,6 +167,11 @@ async function calculateAggregatedStats(from, to, domain) {
     if (item.event && item.event !== 'page_exit') {
       topEvents[item.event] = (topEvents[item.event] || 0) + 1;
     }
+    // calculate page hits
+    if (!pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`]) {
+      pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`] = 0;
+    }
+    pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`]++;
     // calculate page views per hour
     const hour = parseInt(item.hour);
     pageViewsPerHour[hour]++; 
@@ -241,15 +253,12 @@ async function calculateAggregatedStats(from, to, domain) {
     topReferers: topReferersArray,
     topCountries: topCountriesArray,
     topEvents: topEventsArray,
-    pageViewsPerHour,
-    pageViewsPerDayOfWeek,
-    pageViewsPerDayOfMonth,
-    pageViewsPerMonth,
     geoLocCounts: geoLocArray,
     deviceTypes: {
       desktop: desktopSessions,
       mobile: mobileSessions
-    }
+    },
+    pageViewsInPeriod
   };
 }
 
@@ -267,35 +276,3 @@ function parseDateRange(from, to) {
   return { fromYear, fromMonth, fromDay, fromHour, toYear, toMonth, toDay, toHour };
 }
 
-// New function to convert URL to brand name
-function urlToBrandName(url) {
-  const brandMap = {
-    'baidu.com': 'Baidu',
-    'bing.com': 'Bing',
-    'duckduckgo.com': 'DuckDuckGo',
-    'devhunt.org': 'DevHunt',
-    'facebook.com': 'Facebook',
-    'github.com': 'GitHub',
-    'google.com': 'Google',
-    'instagram.com': 'Instagram',
-    'linkedin.com': 'LinkedIn',
-    'pinterest.com': 'Pinterest',
-    'reddit.com': 'Reddit',
-    'snapchat.com': 'Snapchat',
-    'tiktok.com': 'TikTok',
-    'twitter.com': 'X (Twitter)',
-    'whatsapp.com': 'WhatsApp',
-    'yahoo.com': 'Yahoo',
-    'yandex.ru': 'Yandex',
-    'youtube.com': 'YouTube',
-    't.co': 'X (Twitter)',
-    'android-app://com.google.android.gm': 'Gmail (Android)'
-  };
-
-  for (const [domain, brand] of Object.entries(brandMap)) {
-    if (url.includes(domain)) {
-      return brand;
-    }
-  }
-  return url.replace('https://', '');
-}

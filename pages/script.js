@@ -60,7 +60,6 @@ function ajustPeriod(period, op) {
 
 function dashboard() {
     return {
-        domain: 'codehooks.io',
         loading: true,
         period: 'day',
         uniqueUsers: 0,
@@ -82,6 +81,10 @@ function dashboard() {
             desktop: 0,
             mobile: 0
         },
+        pageViewsInPeriod: [],
+        domains: ['codehooks.io', 'restdb.io'],
+        selectedDomain: null,
+        query: {},
         // Add methods to update data based on period changes
 
         async fetchStats() {
@@ -91,6 +94,7 @@ function dashboard() {
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 today.setHours(24, 0, 0, 0);
                 const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
+                
                 const nowStr = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1)).toISOString()
 
                 // Yesterday: [yesterday start of day, yesterday end of day] in UTC
@@ -103,28 +107,22 @@ function dashboard() {
                 const twoDaysAgoStr = twoDaysAgo.toISOString();
                 const twoDaysAgoEndStr = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate()) - 1).toISOString();
 
-                // One week ago: [start of current week, current time] in UTC
-                const oneWeekAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-                oneWeekAgo.setUTCDate(oneWeekAgo.getUTCDate() - oneWeekAgo.getUTCDay()); // Adjust to Monday
-                const oneWeekAgoStr = oneWeekAgo.toISOString();
-                
-                // Two weeks ago: [start of current week, current time] in UTC
-                const twoWeeksAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-                twoWeeksAgo.setUTCDate(twoWeeksAgo.getUTCDate() - oneWeekAgo.getUTCDay() - 6); // Adjust to Monday
-                const twoWeeksAgoStr = twoWeeksAgo.toISOString();
-
-                // One month ago: [1 month ago start of month, current time] in UTC
-                const oneMonthAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
-                const oneMonthAgoStr = oneMonthAgo.toISOString();
-
-                // Two months ago: [2 months ago start of month, current time] in UTC
-                const twoMonthsAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
-                twoMonthsAgo.setUTCMonth(twoMonthsAgo.getUTCMonth() - 1);
-                const twoMonthsAgoStr = twoMonthsAgo.toISOString(); 
 
                 // One year ago: [start of previous year, current time] in UTC
                 const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
                 const oneYearAgoStr = oneYearAgo.toISOString();
+
+                // Last 7 days: [7 days ago, current time] in UTC
+                const last7Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
+                const last7DaysStr = last7Days.toISOString();
+
+                // Last 30 days: [30 days ago, current time] in UTC
+                const last30Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 30));
+                const last30DaysStr = last30Days.toISOString();
+
+                // Last 3 months: [3 months ago, current time] in UTC
+                const last3Months = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 3, today.getUTCDate()));
+                const last3MonthsStr = last3Months.toISOString();
 
                 let fromPeriodStr = '';
                 let toPeriodStr = '';
@@ -138,30 +136,33 @@ function dashboard() {
                         fromPeriodStr = yesterdayStr;
                         toPeriodStr = yesterdayEndStr;
                         break;
-                    case 'week':
-                        fromPeriodStr = oneWeekAgoStr;
+                    case 'last7days':
+                        fromPeriodStr = last7DaysStr;
                         toPeriodStr = nowStr;
                         break;
-                    case 'lastweek':
-                        fromPeriodStr = twoWeeksAgoStr;
-                        toPeriodStr = oneWeekAgoStr;
+                    case 'last30days':
+                        fromPeriodStr = last30DaysStr;
+                        toPeriodStr = nowStr;
                         break;
-                    case 'month':
-                        fromPeriodStr = oneMonthAgoStr;
+                    case 'last3months':
+                        fromPeriodStr = last3MonthsStr;
                         toPeriodStr = nowStr;
                         break;
                     case 'lastmonth':
-                        fromPeriodStr = twoMonthsAgoStr;
-                        toPeriodStr = oneMonthAgoStr;
+                        fromPeriodStr = last3MonthsStr;
+                        toPeriodStr = nowStr;
                         break;
-                    case 'year':
+                    case 'lastyear':
                         fromPeriodStr = oneYearAgoStr;
                         toPeriodStr = nowStr;
                         break;
                 }
+                // If selectedDomain is null, use the first domain from the domains array
+                const domainToUse = this.selectedDomain || this.domains[0];
+
                 // Define multiple API endpoints
                 const endpoints = [
-                    `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${this.domain}`,                    
+                    `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}`,                    
                 ];
 
                 // Use Promise.all to fetch data from multiple endpoints concurrently
@@ -182,34 +183,16 @@ function dashboard() {
                 const [statsData] = await Promise.all(
                     responses.map(response => response.json())
                 );
-
-                // Update graphData labels based on the period
-                switch (this.period) {
-                    case 'week':
-                        this.graphData.labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                        break;
-                    case 'lastweek':
-                        this.graphData.labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                        break;
-                    case 'month':
-                        this.graphData.labels = Array.from({length: 31}, (_, i) => (i + 1).toString());
-                        break;
-                    case 'lastmonth':
-                        this.graphData.labels = Array.from({length: 31}, (_, i) => (i + 1).toString());
-                        break;
-                    case 'year':
-                        this.graphData.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        break;
-                    default:
-                        this.graphData.labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-                }
+                
 
                 // Update the component state
                 this.uniqueUsers = statsData.uniqueUsers;
                 this.totalPageViews = statsData.totalPageViews;
-                this.topReferers = statsData.topReferers.slice(0, 10).map(x => {
+                this.topReferers = statsData.topReferers.slice(0, 10).map((x, index) => {
                     return {
-                        url: (x.url),
+                        index,
+                        url: x.url,
+                        brand: urlToBrandName(x.url),
                         views: x.views
                     }
                 });
@@ -217,7 +200,7 @@ function dashboard() {
                 this.topEvents = statsData.topEvents;
                 this.topPages = statsData.topPages.slice(0, 10).map(x => {
                     return {
-                        url: x.url.replace('https://codehooks.io', ''),
+                        url: x.url.replace(`https://${this.selectedDomain}`, ''),
                         views: x.views
                     }
                 }); 
@@ -226,22 +209,10 @@ function dashboard() {
                 this.bounceRate = statsData.bounceRate;
                 this.averageSessionDuration = statsData.averageSessionDuration;
                 this.eventCompletions = statsData.totalPageEvents;
+                this.pageViewsInPeriod = statsData.pageViewsInPeriod;
                 this.graphData = {
-                    labels: this.graphData.labels,
-                    data: (() => {
-                        switch (this.period) {
-                            case 'week':
-                                return statsData.pageViewsPerDayOfWeek;
-                            case 'month':
-                                return statsData.pageViewsPerDayOfMonth;
-                            case 'lastmonth':
-                                return statsData.pageViewsPerDayOfMonth;
-                            case 'year':
-                                return statsData.pageViewsPerMonth;
-                            default:
-                                return statsData.pageViewsPerHour;
-                        }
-                    })()
+                    labels: Object.keys(this.pageViewsInPeriod).map(date => new Date(date)),
+                    data: Object.values(this.pageViewsInPeriod)
                 };
                 this.deviceTypes = statsData.deviceTypes;
                 this.geoLocCounts = statsData.geoLocCounts.map(x => {return {lat: x.geoloc.lat, lon: x.geoloc.lon, count: x.count}});
@@ -252,7 +223,14 @@ function dashboard() {
         },
 
         updateStats() {
-            this.fetchStats();
+            this.loading = true;
+            // Use this.selectedDomain when fetching data
+            fetch(`/api/stats?period=${this.period}&domain=${this.selectedDomain}&query=${JSON.stringify(this.query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update your stats here
+                    this.loading = false;
+                });
         },
 
         init() {
@@ -296,10 +274,14 @@ function dashboard() {
                 data: {
                     labels: this.graphData.labels,
                     datasets: [{
-                        label: 'Traffic',
+                        label: 'Page Views',
                         data: this.graphData.data,
                         borderColor: 'rgb(75, 75, 75)',
-                        tension: 0.1
+                        backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                        borderWidth: 1, // Add this line to make the stroke thinner
+                        tension: 0.25,
+                        fill: true,
+                        pointRadius: 2
                     }]
                 },
                 options: {
@@ -307,7 +289,22 @@ function dashboard() {
                     maintainAspectRatio: false,
                     scales: {
                         x: {
-                            type: 'category',
+                            type: 'time',
+                            time: {
+                                unit: this.getTimeUnit(),
+                                displayFormats: {
+                                    hour: 'HH:mm',
+                                    day: 'MMM D',
+                                    week: 'MMM D',
+                                    month: 'MMM YYYY'
+                                },
+                                tooltipFormat: this.getTooltipFormat(),
+                                // Add a parser to adjust for local timezone
+                                parser: (value) => {
+                                    const date = new Date(value);
+                                    return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                                }
+                            },
                             title: {
                                 display: true,
                                 text: this.period
@@ -315,12 +312,47 @@ function dashboard() {
                         },
                         y: {
                             beginAtZero: true
-                            
                         }
                     }
                 }
             });
         },
+
+        getTimeUnit() {
+            switch (this.period) {
+                case 'day':
+                case 'yesterday':
+                    return 'hour';
+                case 'last7days':
+                case 'last30days':
+                    return 'day';
+                case 'last3months':
+                case 'lastmonth':
+                    return 'week';
+                case 'lastyear':
+                    return 'month';
+                default:
+                    return 'day';
+            }
+        },
+
+        getTooltipFormat() {
+            switch (this.period) {
+                case 'day':
+                case 'yesterday':
+                    return 'MMM D, HH:mm';
+                case 'last7days':
+                case 'last30days':
+                case 'last3months':
+                case 'lastmonth':
+                    return 'MMM D, YYYY';
+                case 'lastyear':
+                    return 'MMM YYYY';
+                default:
+                    return 'MMM D, YYYY';
+            }
+        },
+
         initMap() {
             console.log('initMap');
             // Check if the map instance already exists
@@ -348,20 +380,22 @@ function dashboard() {
             };
 
 
-            var heatmapLayer = new HeatmapOverlay(cfg);
+            let heatmapLayer = new HeatmapOverlay(cfg);
 
-            var baseLayer = L.tileLayer(
-                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap for Codehooks</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
-                    maxZoom: 18
+            let baseLayer = L.tileLayer(
+                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    maxZoom: 20,
+                    language: 'en' // Set the language to English
                 }
             );
 
             // Create a new map instance
             this.mapInstance = new L.Map('world_map', {            
                 layers: [baseLayer, heatmapLayer],
-                center: [48.8566, 2.3522], // Coordinates for Paris
-                zoom: 3 // Adjust this value to set the initial zoom level
+                center: [51.5074, -0.1278], // Coordinates for London
+                zoom: 3, // Adjust this value to set the initial zoom level
+                language: 'en' // Set the language to English for the map instance
             });
 
             // Create a bounds object to adjust the map view based on locations
@@ -396,9 +430,85 @@ function dashboard() {
             this.updateStats();
             this.initTrafficGraph();
             this.initMap();
+        },
+
+        aggregateDataByPeriod(data) {
+            const aggregatedData = {};
+            const entries = Object.entries(data);
+
+            switch (this.period) {
+                case 'day':
+                case 'yesterday':
+                    // No aggregation needed for daily view
+                    return {
+                        labels: entries.map(([date]) => new Date(date)),
+                        data: entries.map(([, value]) => value)
+                    };
+                default:
+                    // Aggregate by day for all other periods
+                    for (const [date, value] of entries) {
+                        const day = new Date(date).toISOString().split('T')[0];
+                        aggregatedData[day] = (aggregatedData[day] || 0) + value;
+                    }
+            }
+
+            return {
+                labels: Object.keys(aggregatedData).map(key => new Date(key)),
+                data: Object.values(aggregatedData)
+            };
+        },
+
+        getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        },
+
+        setPageFilter(url) {
+            // Implement the logic to filter data for the clicked page
+            console.log(`Setting page filter for: ${url}`);
+            // You might want to update your data or UI based on this filter
+            // For example, you could update your stats to show only data for this page
+            this.query = {referer: `https://${this.selectedDomain || this.domains[0]}${url}`};
+            this.updateStats();
         }
     }
 }
 
 // Initialize the map when the page loads
 //document.addEventListener('DOMContentLoaded', initMap);
+
+// New function to convert URL to brand name
+function urlToBrandName(url) {
+    const brandMap = {
+      'baidu.com': 'Baidu',
+      'bing.com': 'Bing',
+      'duckduckgo.com': 'DuckDuckGo',
+      'devhunt.org': 'DevHunt',
+      'facebook.com': 'Facebook',
+      'github.com': 'GitHub',
+      'google.com': 'Google',
+      'instagram.com': 'Instagram',
+      'linkedin.com': 'LinkedIn',
+      'pinterest.com': 'Pinterest',
+      'reddit.com': 'Reddit',
+      'snapchat.com': 'Snapchat',
+      'tiktok.com': 'TikTok',
+      'twitter.com': 'X (Twitter)',
+      'whatsapp.com': 'WhatsApp',
+      'yahoo.com': 'Yahoo',
+      'yandex.ru': 'Yandex',
+      'youtube.com': 'YouTube',
+      't.co': 'X (Twitter)',
+      'android-app://com.google.android.gm': 'Gmail (Android)'
+    };
+  
+    for (const [domain, brand] of Object.entries(brandMap)) {
+      if (url.includes(domain)) {
+        return brand;
+      }
+    }
+    return url.replace('https://', '');
+  }
