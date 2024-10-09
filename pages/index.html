@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" x-data="{ theme: 'light' }" :data-theme="theme">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,51 +9,107 @@
     <link href="output.css" rel="stylesheet" type="text/css" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-     <script src="heatmap.min.js"></script>
-     <script src="leaflet-heatmap.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="heatmap.min.js"></script>
+    <script src="leaflet-heatmap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
 
     <style>
         .leaflet-container {
-			height: 400px;
-			width: 100%;
-			max-width: 100%;
-			max-height: 100%;
-		}
-        
+            height: 400px;
+            width: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
         .traffic-graph {
             height: 200px;
         }
     </style>
 </head>
+
 <body x-data="dashboard()">
+    <div class="navbar bg-base-100 fixed top-0 left-0 right-0 z-50">
+        <div class="navbar-start">
+            <div class="dropdown" x-data="{ open: false }" @click.away="open = false">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle" @click="open = !open">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                </div>
+                <ul tabindex="0"
+                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                    x-show="open">
+                    <template x-for="domain in domains" :key="domain">
+                        <li><a x-text="domain" @click="selectedDomain = domain; updateStats(); open = false"></a>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <a class="btn btn-ghost text-xl">Analytics</a>
+        </div>
+
+        <div class="navbar-end">
+            <!-- Period Selector -->
+            <div class="dropdown dropdown-end" x-data="{ open: false }">
+                <label tabindex="0" class="btn btn-ghost lg:hidden" @click="open = !open">                        
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </label>
+                <ul tabindex="0"
+                    class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+                    x-show="open" @click.away="open = false">
+                    <li><a :class="{ 'active': period === 'day' }" @click="period = 'day'; updateStats(); open = false">Today</a></li>
+                    <li><a :class="{ 'active': period === 'last2days' }" @click="period = 'last2days'; updateStats(); open = false">2D</a></li>
+                    <li><a :class="{ 'active': period === 'last7days' }" @click="period = 'last7days'; updateStats(); open = false">7D</a></li>
+                    <li><a :class="{ 'active': period === 'last30days' }" @click="period = 'last30days'; updateStats(); open = false">30D</a></li>
+                    <li><a :class="{ 'active': period === 'last3months' }" @click="period = 'last3months'; updateStats(); open = false">3M</a></li>
+                    <li><a :class="{ 'active': period === 'lastyear' }" @click="period = 'lastyear'; updateStats(); open = false">1Y</a></li>
+                </ul>
+            </div>
+            <ul class="menu menu-horizontal px-1 hidden lg:flex">
+                <li><a :class="{ 'active': period === 'day' }" @click="period = 'day'; updateStats()">Today</a></li>
+                <li><a :class="{ 'active': period === 'last2days' }"
+                        @click="period = 'last2days'; updateStats()">2D</a></li>
+                <li><a :class="{ 'active': period === 'last7days' }"
+                        @click="period = 'last7days'; updateStats()">7D</a></li>
+                <li><a :class="{ 'active': period === 'last30days' }"
+                        @click="period = 'last30days'; updateStats()">30D</a></li>
+                <li><a :class="{ 'active': period === 'last3months' }"
+                        @click="period = 'last3months'; updateStats()">3M</a></li>
+                <li><a :class="{ 'active': period === 'lastyear' }"
+                        @click="period = 'lastyear'; updateStats()">1Y</a></li>
+            </ul>
+            <input type="checkbox" class="toggle" x-model="theme" @change="theme = $event.target.checked ? 'dark' : 'light'" />
+            
+            <button class="btn btn-ghost btn-circle">
+                <div class="indicator">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="badge badge-xs badge-primary indicator-item"></span>
+                </div>
+            </button>
+        </div>
+    </div>
     
     <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-6">Custom Analytics Dashboard</h1>
+        
 
-        <!-- Theme toggle -->
-        <div class="flex-shrink-0 top-0 right-0">
-            <input type="checkbox" class="toggle" x-model="theme" @change="theme = $event.target.checked ? 'dark' : 'light'" />
-        </div>
+        <!-- Add a spacer to prevent content from being hidden behind the fixed navbar -->
+        <div class="h-16"></div>
+
         <!-- Toolbar -->
-        
-        <!-- Period Selector -->
-        <div class="tabs tabs-boxed flex-grow-0 mr-4">
-            <a class="tab" :class="{ 'tab-active': period === 'day' }" @click="period = 'day'; updateStats()">Today</a>
-            <a class="tab" :class="{ 'tab-active': period === 'yesterday' }" @click="period = 'yesterday'; updateStats()">Yesterday</a>
-            <a class="tab" :class="{ 'tab-active': period === 'last7days' }" @click="period = 'last7days'; updateStats()">7D</a>
-            <a class="tab" :class="{ 'tab-active': period === 'last30days' }" @click="period = 'last30days'; updateStats()">30D</a>
-            <a class="tab" :class="{ 'tab-active': period === 'last3months' }" @click="period = 'last3months'; updateStats()">3M</a>
-            <a class="tab" :class="{ 'tab-active': period === 'lastyear' }" @click="period = 'lastyear'; updateStats()">1Y</a>
-        </div>
-        
 
         <!-- Unique Users, Active Users, Bounce Rate, and Avg Time Cards -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
@@ -84,7 +141,8 @@
                         <tr>
                             <td class="text-base">Time on Site</td>
                             <td class="text-base text-right">
-                                <span x-show="!loading" x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
+                                <span x-show="!loading"
+                                    x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
                                 <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                             </td>
                         </tr>
@@ -108,8 +166,8 @@
                         <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                     </p>
                 </div>
-            </div>           
-            
+            </div>
+
             <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
                 <div class="card-body items-center text-center">
                     <h2 class="card-title">Views</h2>
@@ -119,7 +177,7 @@
                     </p>
                 </div>
             </div>
-            
+
             <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
                 <div class="card-body items-center text-center">
                     <h2 class="card-title">Bounce</h2>
@@ -129,17 +187,18 @@
                     </p>
                 </div>
             </div>
-            
+
             <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
                 <div class="card-body items-center text-center">
                     <h2 class="card-title">Time on Site</h2>
                     <p class="text-xl"> <!-- Removed font-bold -->
-                        <span x-show="!loading" x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
+                        <span x-show="!loading"
+                            x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
                         <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                     </p>
                 </div>
             </div>
-            
+
             <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
                 <div class="card-body items-center text-center">
                     <h2 class="card-title">Events</h2>
@@ -152,7 +211,7 @@
         </div>
         <!-- Traffic graph -->
         <div class="card bg-base-100 shadow-xl mb-4">
-            <div class="card-body items-center text-center">    
+            <div class="card-body items-center text-center">
                 <canvas id="traffic-graph" class="w-full traffic-graph"></canvas>
             </div>
         </div>
@@ -173,7 +232,8 @@
                             <template x-for="page in topPages" :key="page.url">
                                 <tr>
                                     <td class="py-1 pr-4">
-                                        <a href="#" @click.prevent="setPageFilter(page.url)" class="text-blue-600 hover:underline">
+                                        <a href="#" @click.prevent="setPageFilter(page.url)"
+                                            class="text-blue-600 hover:underline">
                                             <span x-text="page.url"></span>
                                         </a>
                                     </td>
@@ -232,11 +292,11 @@
                             <tr>
                                 <td class="py-1 pr-4">Desktop</td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.desktop"></td>
-                            </tr>                            
+                            </tr>
                             <tr>
                                 <td class="py-1 pr-4">Mobile</td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.mobile"></td>
-                            </tr>                            
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -263,7 +323,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>            
+            </div>
         </div>
 
         <!-- Top Custom Events -->
@@ -302,4 +362,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

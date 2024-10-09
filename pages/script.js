@@ -54,9 +54,6 @@ async function fetchWithJWT(url, options = {}) {
     // If response is not 401, return the original response
     return response;
 }
-function ajustPeriod(period, op) {
-    return Number(period - op).toString().padStart(2, '0')
-}    
 
 function dashboard() {
     return {
@@ -107,10 +104,10 @@ function dashboard() {
                 const twoDaysAgoStr = twoDaysAgo.toISOString();
                 const twoDaysAgoEndStr = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate()) - 1).toISOString();
 
-
-                // One year ago: [start of previous year, current time] in UTC
-                const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
-                const oneYearAgoStr = oneYearAgo.toISOString();
+                // Last 2 days: [two days ago start of day, yesterday end of day] in UTC
+                const last2Days = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate() - 1));
+                const last2DaysStr = last2Days.toISOString();
+                const last2DaysEndStr = yesterdayStr;
 
                 // Last 7 days: [7 days ago, current time] in UTC
                 const last7Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
@@ -124,6 +121,10 @@ function dashboard() {
                 const last3Months = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 3, today.getUTCDate()));
                 const last3MonthsStr = last3Months.toISOString();
 
+                // One year ago: [start of previous year, current time] in UTC
+                const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
+                const oneYearAgoStr = oneYearAgo.toISOString();
+
                 let fromPeriodStr = '';
                 let toPeriodStr = '';
 
@@ -132,9 +133,9 @@ function dashboard() {
                         fromPeriodStr = todayStr;
                         toPeriodStr = nowStr;
                         break;
-                    case 'yesterday':
-                        fromPeriodStr = yesterdayStr;
-                        toPeriodStr = yesterdayEndStr;
+                    case 'last2days':
+                        fromPeriodStr = last2DaysEndStr;
+                        toPeriodStr = nowStr;
                         break;
                     case 'last7days':
                         fromPeriodStr = last7DaysStr;
@@ -188,14 +189,27 @@ function dashboard() {
                 // Update the component state
                 this.uniqueUsers = statsData.uniqueUsers;
                 this.totalPageViews = statsData.totalPageViews;
-                this.topReferers = statsData.topReferers.slice(0, 10).map((x, index) => {
-                    return {
-                        index,
-                        url: x.url,
-                        brand: urlToBrandName(x.url),
-                        views: x.views
-                    }
-                });
+                // top referrers (Brands) sorted by views
+                this.topReferers = statsData.topReferers
+                    .slice(0, 10)
+                    .reduce((acc, x) => {
+                        const brand = urlToBrandName(x.url);
+                        const existingBrand = acc.find(item => item.brand === brand);
+                        
+                        if (existingBrand) {
+                            existingBrand.views += x.views;
+                        } else {
+                            acc.push({
+                                url: x.url,
+                                brand: brand,
+                                views: x.views
+                            });
+                        }
+                        
+                        return acc;
+                    }, [])
+                    .sort((a, b) => b.views - a.views)
+                    .map((x, index) => ({ ...x, index }));
                 this.topCountries = statsData.topCountries.slice(0, 10);
                 this.topEvents = statsData.topEvents;
                 this.topPages = statsData.topPages.slice(0, 10).map(x => {
@@ -279,9 +293,9 @@ function dashboard() {
                         borderColor: 'rgb(75, 75, 75)',
                         backgroundColor: 'rgba(0, 0, 128, 0.2)',
                         borderWidth: 1, // Add this line to make the stroke thinner
-                        tension: 0.25,
+                        //tension: 0.25,
                         fill: true,
-                        pointRadius: 2
+                        pointRadius: 0
                     }]
                 },
                 options: {
@@ -430,41 +444,7 @@ function dashboard() {
             this.updateStats();
             this.initTrafficGraph();
             this.initMap();
-        },
-
-        aggregateDataByPeriod(data) {
-            const aggregatedData = {};
-            const entries = Object.entries(data);
-
-            switch (this.period) {
-                case 'day':
-                case 'yesterday':
-                    // No aggregation needed for daily view
-                    return {
-                        labels: entries.map(([date]) => new Date(date)),
-                        data: entries.map(([, value]) => value)
-                    };
-                default:
-                    // Aggregate by day for all other periods
-                    for (const [date, value] of entries) {
-                        const day = new Date(date).toISOString().split('T')[0];
-                        aggregatedData[day] = (aggregatedData[day] || 0) + value;
-                    }
-            }
-
-            return {
-                labels: Object.keys(aggregatedData).map(key => new Date(key)),
-                data: Object.values(aggregatedData)
-            };
-        },
-
-        getWeekNumber(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-        },
+        },        
 
         setPageFilter(url) {
             // Implement the logic to filter data for the clicked page
@@ -480,7 +460,7 @@ function dashboard() {
 // Initialize the map when the page loads
 //document.addEventListener('DOMContentLoaded', initMap);
 
-// New function to convert URL to brand name
+// Helper function to convert URL to brand name
 function urlToBrandName(url) {
     const brandMap = {
       'baidu.com': 'Baidu',
