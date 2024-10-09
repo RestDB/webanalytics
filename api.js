@@ -23,39 +23,7 @@ function normalizeUrl(url, domain) {
 }
 
 /*
-Create stats via API
-{
-  "domain": "example.com",
-  "ip": "127.0.0.1",
-  "acceptLanguage": "en-US,en;q=0.9",
-  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-  "osName": "Windows",
-  "osVersion": "10",
-  "deviceVendor": null,
-  "deviceModel": null,
-  "deviceType": "desktop",
-  "referer": "https://www.example.com/",
-  "campaign": null,
-  "campaignSource": null,
-  "apiPath": "/api/track",
-  "originalUrl": "https://www.example.com/api/track",
-  "params": {},
-  "geoCountry": "US",
-  "geoCountryName": "United States",
-  "geoCity": "New York",
-  "geoRegion": "NY",
-  "geoLoc": "40.7128,-74.0060",
-  "geoTimezone": "America/New_York",
-  "timestamp": "2023-04-15T12:00:00Z",
-  "via": null,
-  "sessionId": "sess_123456789",
-  "event": "page_view",
-  "eventData": null,
-  "year": 2023,
-  "month": 4,
-  "day": 15,
-  "hour": 12
-}
+Create stats data via API
 */
 export async function createStats(req, res) {
   try {
@@ -146,7 +114,7 @@ async function calculateAggregatedStats(from, to, domain, inputquery) {
     }
     // calculate top pages
     if (item.referer) {
-      const normalizedReferer = normalizeUrl(item.referer, domain);
+      const normalizedReferer = item.referer;//normalizeUrl(item.referer, domain);
       topPages[normalizedReferer] = (topPages[normalizedReferer] || 0) + 1;
     }
     // calculate top referrers

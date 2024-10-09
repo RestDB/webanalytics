@@ -67,6 +67,13 @@ Secure user/password authentication by the open source  package [codehooks-auth]
    ```
    coho createcollection users
    ```
+4. Configure the Geolocation API token `IPINFO_TOKEN` environment variable:
+   Sign up for an account at [ipinfo.io](https://ipinfo.io/). They offer a free tier that should be more than enough for personal use.
+
+   ```
+   coho set-env IPINFO_TOKEN 'your_token_here' --encrypted
+   ```
+   
 
 ## Usage
 

@@ -214,7 +214,7 @@ function dashboard() {
                 this.topEvents = statsData.topEvents;
                 this.topPages = statsData.topPages.slice(0, 10).map(x => {
                     return {
-                        url: x.url.replace(`https://${this.selectedDomain}`, ''),
+                        url: normalizeUrl(x.url, this.selectedDomain),
                         views: x.views
                     }
                 }); 
@@ -491,4 +491,24 @@ function urlToBrandName(url) {
       }
     }
     return url.replace('https://', '');
+  }
+
+// Helper function to convert URL to page name
+
+function normalizeUrl(url, domain) {
+    // Remove protocol (http:// or https://)
+    url = url.replace(/^https?:\/\//, '');
+    
+    // Remove www. if present
+    url = url.replace(/^www\./, '');
+    
+    // Remove trailing slash if present
+    url = url.replace(/\/$/, '');
+    
+    // If the URL starts with the domain, keep only the path
+    if (url.startsWith(domain)) {
+      url = url.substring(domain.length) || '/';
+    }
+    
+    return url;
   }
