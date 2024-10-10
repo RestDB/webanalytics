@@ -77,6 +77,8 @@ async function calculateAggregatedStats(from, to, domain, inputquery) {
   let totalPageEvents = 0;
   let totalSessionDuration = 0;
   let sessionCounts = {};
+  let sessionStartTimes = {};
+  let sessionEndTimes = {};
   let topPages = {};
   let topReferers = {};
   let topCountries = {};
@@ -87,10 +89,6 @@ async function calculateAggregatedStats(from, to, domain, inputquery) {
   let mobileSessions = 0;
   let processedSessions = new Set();
 
-  let pageViewsPerHour = new Array(24).fill(0);
-  let pageViewsPerDayOfWeek = new Array(7).fill(0);
-  let pageViewsPerDayOfMonth = new Array(31).fill(0);
-  let pageViewsPerMonth = new Array(12).fill(0);
   let pageViewsInPeriod = {};
 
   await cursor.forEach((item) => {
@@ -104,15 +102,25 @@ async function calculateAggregatedStats(from, to, domain, inputquery) {
       totalPageEvents++;
     }
 
-    // Calculate session duration and count page views per session
-    if (item.event === 'page_exit' && item.eventData && item.eventData.sessionDuration) {
-      totalSessionDuration += item.eventData.sessionDuration;
+    // Track session start and end times
+    if (!sessionStartTimes[item.sessionId] || item.timestamp < sessionStartTimes[item.sessionId]) {
+      sessionStartTimes[item.sessionId] = item.timestamp;
     }
-    // count page views per session
-    if ((item.event || null) !== 'page_exit') {
+    if (!sessionEndTimes[item.sessionId] || item.timestamp > sessionEndTimes[item.sessionId]) {
+      sessionEndTimes[item.sessionId] = item.timestamp;
+    }
+
+     // count page views per session
+     if ((item.event || null) !== 'page_exit') {
       sessionCounts[item.sessionId] = (sessionCounts[item.sessionId] || 0) + 1;
     }
-    // calculate top pages
+
+    // Remove the old session duration calculation
+    // if (item.event === 'page_exit' && item.eventData && item.eventData.sessionDuration) {
+    //   totalSessionDuration += item.eventData.sessionDuration;
+    // }
+
+    // Calculate top pages
     if (item.referer) {
       const normalizedReferer = item.referer;//normalizeUrl(item.referer, domain);
       topPages[normalizedReferer] = (topPages[normalizedReferer] || 0) + 1;
@@ -140,18 +148,8 @@ async function calculateAggregatedStats(from, to, domain, inputquery) {
       pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`] = 0;
     }
     pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`]++;
-    // calculate page views per hour
-    const hour = parseInt(item.hour);
-    pageViewsPerHour[hour]++; 
-    // calculate page views per day
-    const dayOfWeek = new Date(item.timestamp).getDay();
-    pageViewsPerDayOfWeek[dayOfWeek]++;
-    // calculate page views per month
-    const dayOfMonth = parseInt(item.day)-1;
-    pageViewsPerDayOfMonth[dayOfMonth]++;
-    // calculate page views per year
-    const month = parseInt(item.month)-1;
-    pageViewsPerMonth[month]++;
+    
+    
     // caclulate unique geolocations, and count for each geolocation, "geoLoc": "1.2897,103.8501", 
     if (item.geoLoc) {
       const [latitude, longitude] = item.geoLoc.split(',');
@@ -170,6 +168,19 @@ async function calculateAggregatedStats(from, to, domain, inputquery) {
       processedSessions.add(item.sessionId);
     } 
   });
+
+  
+  // Calculate total session duration after processing all items
+  for (const sessionId of Object.keys(sessionStartTimes)) {
+    const startTime = new Date(sessionStartTimes[sessionId]).getTime();
+    const endTime = new Date(sessionEndTimes[sessionId]).getTime();
+    const sessionDuration = endTime - startTime;
+    //console.log('sess', sessionId, sessionDuration, new Date(sessionStartTimes[sessionId]), new Date(sessionEndTimes[sessionId]));
+    if (sessionDuration > 0) {
+      
+      totalSessionDuration += sessionDuration;
+    }
+  }
 
   // Sort all top categories from highest to lowest and limit to top 10
   topPages = Object.fromEntries(

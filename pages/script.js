@@ -82,6 +82,7 @@ function dashboard() {
         domains: ['codehooks.io', 'restdb.io'],
         selectedDomain: null,
         query: {},
+        filters: [],
         // Add methods to update data based on period changes
 
         async fetchStats() {
@@ -212,12 +213,28 @@ function dashboard() {
                     .map((x, index) => ({ ...x, index }));
                 this.topCountries = statsData.topCountries.slice(0, 10);
                 this.topEvents = statsData.topEvents;
-                this.topPages = statsData.topPages.slice(0, 10).map(x => {
-                    return {
-                        url: normalizeUrl(x.url, this.selectedDomain),
-                        views: x.views
-                    }
-                }); 
+                // Store the selected domain in a local variable
+                const selectedDomain = this.selectedDomain || this.domains[0];
+                // top pages sorted by views
+                this.topPages = statsData.topPages
+                    .reduce((acc, x) => {
+                        const normalizedUrl = normalizeUrl(x.url, selectedDomain);
+                        const existingPage = acc.find(page => page.url === normalizedUrl);
+                        
+                        if (existingPage) {
+                            existingPage.views += x.views;
+                        } else {
+                            acc.push({
+                                originalUrl: x.url,
+                                url: normalizedUrl,
+                                views: x.views
+                            });
+                        }
+                        
+                        return acc;
+                    }, [])
+                    .sort((a, b) => b.views - a.views)
+                    .slice(0, 10);
                 this.locations = statsData.locations;
                 //this.signups = statsData.signups;
                 this.bounceRate = statsData.bounceRate;
@@ -446,12 +463,28 @@ function dashboard() {
             this.initMap();
         },        
 
-        setPageFilter(url) {
-            // Implement the logic to filter data for the clicked page
-            console.log(`Setting page filter for: ${url}`);
-            // You might want to update your data or UI based on this filter
-            // For example, you could update your stats to show only data for this page
-            this.query = {referer: `https://${this.selectedDomain || this.domains[0]}${url}`};
+        setPageFilter(field, value) {
+            // Check if the field-value pair already exists in the filters array
+            const filterExists = this.filters.some(filter => filter.field === field && filter.value === value);
+
+            if (!filterExists) {
+                this.filters.push({field: field, value: value, key: `${this.filters.length+1}`});
+                // Implement the logic to filter data for the clicked page
+                console.log(`Setting page filter for: ${field} = ${value}`);
+                // You might want to update your data or UI based on this filter
+                // For example, you could update your stats to show only data for this page
+                this.query = {referer: value};
+                this.updateStats();
+            } else {
+                console.log(`Filter for ${field} = ${value} already exists`);
+            }
+        },
+
+        removeFilter(filterToRemove) {
+            this.filters = this.filters.filter(filter => 
+                filter.field !== filterToRemove.field || filter.value !== filterToRemove.value
+            );
+            this.query = {};
             this.updateStats();
         }
     }

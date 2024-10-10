@@ -109,8 +109,20 @@
         <!-- Add a spacer to prevent content from being hidden behind the fixed navbar -->
         <div class="h-16"></div>
 
-        <!-- Toolbar -->
-
+        <!-- Container for filters -->
+        <div x-show="filters.length > 0" class="mb-4">
+            <div class="bg-base-100 shadow-xl p-4 rounded-lg">
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="filter in filters" :key="filter.key">
+                        <div class="badge badge-primary">
+                            <span x-text="`${filter.field}=${filter.value}`"></span>
+                            <button class="ml-2" @click="removeFilter(filter)">×</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        
         <!-- Unique Users, Active Users, Bounce Rate, and Avg Time Cards -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             <!-- Combined Card for Mobile -->
@@ -232,7 +244,7 @@
                             <template x-for="page in topPages" :key="page.url">
                                 <tr>
                                     <td class="py-1 pr-4">
-                                        <a href="#" @click.prevent="setPageFilter(page.url)"
+                                        <a href="#" @click.prevent="setPageFilter('page', page.originalUrl)"
                                             class="text-blue-600 hover:underline">
                                             <span x-text="page.url"></span>
                                         </a>
