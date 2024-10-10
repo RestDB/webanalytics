@@ -14,9 +14,12 @@
     "codehooks-js": "^1.2.18",
     "countries-list": "^3.1.1",
     "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.63.0",
     "ua-parser-js": "^1.0.39"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
     "tailwindcss": "^3.4.13"
   }
 }

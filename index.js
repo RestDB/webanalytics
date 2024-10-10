@@ -8,7 +8,7 @@ import { mapRoute } from './map.js';
 import { getAggregatedStats, createStats } from './api.js';
 import { generatePixel } from './utils.js';
 import { initAuth } from 'codehooks-auth'
-
+import { aiassist } from './aiassist.js';
 /*
 Authentication
 */
@@ -83,6 +83,8 @@ app.static({route: '/dashboard', directory: '/pages', default: 'index.html'})
 */
 app.get('/api/aggstats/:from/:to', getAggregatedStats);
 app.post('/api/stats', createStats);
+app.get('/api/aiassist', aiassist);
+
 /* 
   Bind application to serverless runtime
 */

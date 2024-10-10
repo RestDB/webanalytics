@@ -56,7 +56,7 @@ export async function getAggregatedStats(req, res) {
   }
 }
 
-async function calculateAggregatedStats(from, to, domain, inputquery) {
+export async function calculateAggregatedStats(from, to, domain, inputquery) {
   let query = {
     domain,
     timestamp: {

@@ -83,6 +83,13 @@ function dashboard() {
         selectedDomain: null,
         query: {},
         filters: [],
+        aiassist: {
+            "recommendations": [],
+            "summary": "",
+            "key insights": [],
+            "data-driven recommendations": [],
+            "unusual patterns or anomalies or fun facts": []
+        },
         // Add methods to update data based on period changes
 
         async fetchStats() {
@@ -162,32 +169,38 @@ function dashboard() {
                 // If selectedDomain is null, use the first domain from the domains array
                 const domainToUse = this.selectedDomain || this.domains[0];
 
-                // Define multiple API endpoints
-                const endpoints = [
-                    `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}`,                    
-                ];
+                // Define the endpoints
+                const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}`;
+                const aiAssistEndpoint = `/api/aiassist?domain=${domainToUse}`;
 
-                // Use Promise.all to fetch data from multiple endpoints concurrently
-                const responses = await Promise.all(endpoints.map(endpoint => 
-                    fetchWithJWT(endpoint, {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                ));
+                // Fetch stats data
+                const statsResponse = await fetchWithJWT(statsEndpoint, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-                // Check if all responses are ok
-                if (responses.some(response => !response.ok)) {
-                    throw new Error(`One or more requests failed`);
+                if (!statsResponse.ok) {
+                    throw new Error('Failed to fetch stats data');
                 }
 
-                // Parse all responses
-                const [statsData] = await Promise.all(
-                    responses.map(response => response.json())
-                );
-                
+                const statsData = await statsResponse.json();
+
+                // Fetch AI assist data
+                const aiAssistResponse = await fetchWithJWT(aiAssistEndpoint, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!aiAssistResponse.ok) {
+                    throw new Error('Failed to fetch AI assist data');
+                }
+
+                const aiassistData = await aiAssistResponse.json();
 
                 // Update the component state
+                this.aiassist = aiassistData;
                 this.uniqueUsers = statsData.uniqueUsers;
                 this.totalPageViews = statsData.totalPageViews;
                 // top referrers (Brands) sorted by views

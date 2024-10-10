@@ -123,6 +123,7 @@
             </div>
         </div>
         
+        
         <!-- Unique Users, Active Users, Bounce Rate, and Avg Time Cards -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             <!-- Combined Card for Mobile -->
@@ -221,6 +222,31 @@
                 </div>
             </div>
         </div>
+        <!-- AI Assist -->
+        <div class="card bg-base-100 shadow-xl mb-4">
+            <div class="card-body">
+                <h2 class="card-title">AI Advisor</h2>
+                <div class="prose">
+                    <template x-if="aiassist.recommendations && aiassist.recommendations.length > 0">
+                        <ul>
+                            <template x-for="recommendation in aiassist.recommendations" :key="recommendation">
+                                <li x-text="recommendation"></li>
+                            </template>
+                        </ul>
+                    </template>
+                    
+                    <p x-show="!aiassist.recommendations || aiassist.recommendations.length === 0">No recommendations available at this time.</p>
+
+                    <!-- Updated section for unusual patterns or anomalies or fun facts -->
+                    <template x-if="aiassist['unusual patterns or anomalies or fun facts'] && aiassist['unusual patterns or anomalies or fun facts'].length > 0">
+                        <div class="mt-4">                            
+                            <blockquote x-text="aiassist['unusual patterns or anomalies or fun facts'][0]"></blockquote>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
         <!-- Traffic graph -->
         <div class="card bg-base-100 shadow-xl mb-4">
             <div class="card-body items-center text-center">
