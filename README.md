@@ -6,9 +6,12 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
 
 - Track page views and user interactions
 - User authentication system
+- OpenAI AI Assist for insights and recommendations
 - Custom event tracking
 - Real-time analytics dashboard
 - Easy integration with your existing websites
+- Supports multiple domains
+- Geolocation data
 
 ## Screenshots
 
