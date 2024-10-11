@@ -73,7 +73,12 @@ Secure user/password authentication by the open source  package [codehooks-auth]
    ```
    coho set-env IPINFO_TOKEN 'your_token_here' --encrypted
    ```
-   
+5. Configure the OpenAI API key `OPENAI_API_KEY` environment variable:
+   Get your API key from [OpenAI](https://platform.openai.com/api-keys).
+
+   ```
+   coho set-env OPENAI_API_KEY 'your_api_key_here' --encrypted
+   ```
 
 ## Usage
 
