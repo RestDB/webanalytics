@@ -1,61 +1,7 @@
-// Refresh the access token
-async function refreshAccessToken() {
-            
-    // httpOnly refresh-token Cookie will be sent to server
-    const response = await fetch('/auth/refreshtoken', {
-        method: 'POST',
-        credentials: "include",
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    });
+import { fetchWithJWT } from './cohoapi.js';
+import { normalizeUrl, urlToBrandName } from './utils.js';
 
-    if (response.ok) {
-        const data = await response.json();
-        return data;
-    } else {
-        throw new Error('Failed to refresh token');
-    }
-}
-// The main fetch wrapper function with JWT token handling
-async function fetchWithJWT(url, options = {}) {
-    
-    // Clone the original request options to safely retry later
-    const originalRequestOptions = { ...options };
-
-    // httpOnly access-token Cookie will be sent to server
-    options.headers = {                
-        ...options.headers,
-        credentials: "include"
-    };            
-
-    const response = await fetch(url, options);
-
-    // If the access token is expired (assuming 401 Unauthorized)
-    if (response.status === 401) {
-        try {
-            // Attempt to refresh the access token
-            const newAccessToken = await refreshAccessToken();
-
-            // Retry the original request with the new access token
-            originalRequestOptions.headers = {
-                ...originalRequestOptions.headers,
-                credentials: "include",
-            };
-
-            // Retry the original request with the new token
-            return fetch(url, originalRequestOptions);
-        } catch (error) {
-            console.error('Token refresh failed:', error);
-            return window.location.href = '/auth/login.html';
-        }
-    }
-
-    // If response is not 401, return the original response
-    return response;
-}
-
-function dashboard() {
+export function dashboard() {
     return {
         loading: true,
         period: 'day',
@@ -280,21 +226,6 @@ function dashboard() {
             }
         },
 
-        updateStats() {
-            this.loading = true;
-            // Use this.selectedDomain when fetching data
-            fetch(`/api/stats?period=${this.period}&domain=${this.selectedDomain}&query=${JSON.stringify(this.query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Update your stats here
-                    this.loading = false;
-                });
-        },
-
-        init() {
-            this.updateStats();            
-        },
-
         async updateStats() {
             this.loading = true;
             try {                
@@ -515,9 +446,10 @@ function dashboard() {
             this.filters = this.filters.filter(filter => 
                 filter.field !== filterToRemove.field || filter.value !== filterToRemove.value
             );
-            if (this.query[filterToRemove.field]) {
-                delete this.query[filterToRemove.field];
-            }
+            this.query = this.filters.reduce((acc, filter) => {
+                acc[filter.field] = filter.value;
+                return acc;
+            }, {});
             this.updateStats();
         },
 
@@ -534,55 +466,7 @@ function dashboard() {
 // Initialize the map when the page loads
 //document.addEventListener('DOMContentLoaded', initMap);
 
-// Helper function to convert URL to brand name
-function urlToBrandName(url) {
-    const brandMap = {
-      'baidu.com': 'Baidu',
-      'bing.com': 'Bing',
-      'duckduckgo.com': 'DuckDuckGo',
-      'devhunt.org': 'DevHunt',
-      'facebook.com': 'Facebook',
-      'github.com': 'GitHub',
-      'google.com': 'Google',
-      'instagram.com': 'Instagram',
-      'linkedin.com': 'LinkedIn',
-      'pinterest.com': 'Pinterest',
-      'reddit.com': 'Reddit',
-      'snapchat.com': 'Snapchat',
-      'tiktok.com': 'TikTok',
-      'twitter.com': 'X (Twitter)',
-      'whatsapp.com': 'WhatsApp',
-      'yahoo.com': 'Yahoo',
-      'yandex.ru': 'Yandex',
-      'youtube.com': 'YouTube',
-      't.co': 'X (Twitter)',
-      'android-app://com.google.android.gm': 'Gmail (Android)'
-    };
-  
-    for (const [domain, brand] of Object.entries(brandMap)) {
-      if (url.includes(domain)) {
-        return brand;
-      }
-    }
-    return url.replace('https://', '');
-  }
 
-// Helper function to convert URL to page name
 
-function normalizeUrl(url, domain) {
-    // Remove protocol (http:// or https://)
-    url = url.replace(/^https?:\/\//, '');
-    
-    // Remove www. if present
-    url = url.replace(/^www\./, '');
-    
-    // Remove trailing slash if present
-    url = url.replace(/\/$/, '');
-    
-    // If the URL starts with the domain, keep only the path
-    if (url.startsWith(domain)) {
-      url = url.substring(domain.length) || '/';
-    }
-    
-    return url;
-  }
+  // Make the dashboard function available to the global scope
+  window.dashboard = dashboard;
