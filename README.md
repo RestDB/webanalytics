@@ -191,10 +191,22 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
     { "event": "ImageCarouselSwiped", "views": 9 },
     { "event": "Login", "views": 4 }
   ],
-  "pageViewsPerHour": [63, 21, 9, 15, 38, 1, 2, 5, 4, 18, 9, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  "pageViewsPerDayOfWeek": [0, 0, 0, 0, 0, 0, 199],
-  "pageViewsPerDayOfMonth": [0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  "pageViewsPerMonth": [0, 0, 0, 0, 0, 0, 0, 0, 0, 199, 0, 0],
+  "pageViewsInPeriod": {
+    "2024-10-05T00:00": 5,
+    "2024-10-05T01:00": 3,
+    "2024-10-05T02:00": 7,
+    "2024-10-05T03:00": 12,
+    "2024-10-05T04:00": 6,
+    "2024-10-05T05:00": 2,
+    "2024-10-05T06:00": 10,
+    "2024-10-05T07:00": 7,
+    "2024-10-05T08:00": 12,
+    "2024-10-05T09:00": 28,
+    "2024-10-05T10:00": 17,
+    "2024-10-05T11:00": 15,
+    "2024-10-05T12:00": 2,
+    "2024-10-05T13:00": 1
+  },
   "deviceTypes": {
     "desktop": 37,
     "mobile": 8
@@ -377,6 +389,12 @@ To set up the `IPINFO_TOKEN`:
 Make sure to keep your API token secret and never commit it to version control.
 
 The `IPINFO_TOKEN` is used in the `getCountryFromIP` function in `utils.js` to authenticate requests to the IPInfo API.
+
+### OPENAI_API_KEY
+
+The `OPENAI_API_KEY` is an environment variable used to authenticate requests to the OpenAI API.
+
+You can get an API key from [OpenAI](https://platform.openai.com/api-keys).
 
 ### JWT_ACCESS_TOKEN_SECRET
 
