@@ -394,9 +394,8 @@ The `IPINFO_TOKEN` is used in the `getCountryFromIP` function in `utils.js` to a
 
 The `OPENAI_API_KEY` is an environment variable used to authenticate requests to the OpenAI API.
 
-You can get an API key from [OpenAI](https://platform.openai.com/api-keys).
-
-To set up the `OPENAI_API_KEY`:
+1. Get your API key from [OpenAI](https://platform.openai.com/api-keys).
+2. Set the environment variable in your project:
 ```
 coho set-env OPENAI_API_KEY 'your_api_key_here' --encrypted
 ```
