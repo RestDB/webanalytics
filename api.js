@@ -46,7 +46,6 @@ export async function getAggregatedStats(req, res) {
     const { from, to } = req.params;
     if (query) {
       query = JSON.parse(query);
-      console.log('query', query);
     }
     const stats = await calculateAggregatedStats(from, to, domain, query);
     res.json(stats);
@@ -69,7 +68,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     query = { ...query, ...inputquery };
   }
   const db = await datastore.open();
-  const cursor = db.getMany('traffic', query);
+  const cursor = db.getMany('traffic', query, {useIndex: 'timestamp', start: from, end: to});
 
   let uniqueUsers = new Set();
   let totalPageViews = 0;

@@ -105,8 +105,8 @@
             <div class="bg-base-100 shadow-xl p-4 rounded-lg">
                 <div class="flex flex-wrap gap-2">
                     <template x-for="filter in filters" :key="filter.key">
-                        <div class="badge badge-primary">
-                            <span x-text="`${filter.field}=${filter.value}`"></span>
+                        <div class="badge">
+                            <span x-text="`${filter.value}`"></span>
                             <button class="ml-2" @click="removeFilter(filter)">×</button>
                         </div>
                     </template>
@@ -321,7 +321,7 @@
                             <template x-for="page in topPages" :key="page.url">
                                 <tr>
                                     <td class="py-1 pr-4">
-                                        <a href="#" @click.prevent="setPageFilter('page', page.originalUrl)"
+                                        <a href="#" @click.prevent="setPageFilter('referer', page.originalUrl)"
                                             class="link link-hover">
                                             <span x-text="page.url"></span>
                                         </a>
@@ -351,7 +351,7 @@
                             <template x-for="referer in topReferers" :key="referer.index">
                                 <tr>
                                     <td class="py-1 pr-4">
-                                        <a href="#" @click.prevent="setPageFilter('referer', referer.index)"
+                                        <a href="#" @click.prevent="setPageFilter('via', referer.url)"
                                             class="link link-hover">
                                             <span x-text="referer.brand"></span>
                                         </a>
@@ -415,7 +415,7 @@
                             <template x-for="country in topCountries" :key="country.country">
                                 <tr>
                                     <td class="py-1 pr-4 link">
-                                        <a href="#" @click.prevent="setPageFilter('country', country.country)"
+                                        <a href="#" @click.prevent="setPageFilter('geoCountryName', country.country)"
                                             class="link link-hover">
                                             <span x-text="country.country"></span>
                                         </a>

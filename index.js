@@ -88,6 +88,10 @@ app.get('/api/aiassist', aiassist);
 /* 
   Bind application to serverless runtime
 */
-export default app.init();
+export default app.init(async() => {
+  // create indexes
+  const conn = await datastore.open();    
+  await conn.createIndex('traffic', ['timestamp', 'domain']);
+});
 
 

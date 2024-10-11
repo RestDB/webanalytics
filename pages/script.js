@@ -500,7 +500,11 @@ function dashboard() {
                 console.log(`Setting page filter for: ${field} = ${value}`);
                 // You might want to update your data or UI based on this filter
                 // For example, you could update your stats to show only data for this page
-                this.query = {referer: value};
+                // set query to all field and value in the filters array
+                this.query = this.filters.reduce((acc, filter) => {
+                    acc[filter.field] = filter.value;
+                    return acc;
+                }, {});
                 this.updateStats();
             } else {
                 console.log(`Filter for ${field} = ${value} already exists`);
@@ -511,7 +515,9 @@ function dashboard() {
             this.filters = this.filters.filter(filter => 
                 filter.field !== filterToRemove.field || filter.value !== filterToRemove.value
             );
-            this.query = {};
+            if (this.query[filterToRemove.field]) {
+                delete this.query[filterToRemove.field];
+            }
             this.updateStats();
         },
 
