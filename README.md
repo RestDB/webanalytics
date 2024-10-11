@@ -287,6 +287,71 @@ Content-Type: application/json
 }
 ``` 
 
+### Get AI Assist Insights
+
+```
+GET /api/aiassist
+```
+
+This endpoint provides AI-assisted functionality for the analytics dashboard. It leverages artificial intelligence to offer insights, suggestions, or automated analysis based on the collected analytics data.
+
+#### Usage
+
+Send a GET request to `/api/aiassist` to receive AI-generated assistance. The specific functionality and response format will depend on the implementation in the `aiassist.js` file.
+
+#### Parameters
+
+- `domain`: (Query parameter, required) The domain to generate insights for (e.g., "codehooks.io")
+
+#### Example Request
+
+```
+GET https://your-coho-app-url.codehooks.io/api/aiassist?domain=codehooks.io
+```
+
+#### Headers
+
+- `Authorization`: Bearer token (JWT)
+- Or
+- `x-apikey`: Your API key
+
+#### Response
+
+The response will contain AI-generated insights or recommendations based on the analytics data for the specified domain. The exact format and content of the response will depend on the implementation of the `aiassist` function.
+
+Example response:
+
+```json
+{
+    "lastUpdated": "2024-10-11T12:00:00Z",
+    "ingress": "some text here...",
+    "recommendations": [
+        "some recommendation here...",
+        "another recommendation here..."
+    ],
+    "summary": "some summary here...",
+    "key insights": [
+        "some key insight here...",
+        "another key insight here..."
+    ],
+    "data-driven recommendations": [
+        "some data-driven recommendation here...",
+        "another data-driven recommendation here..."
+    ],
+    "unusual patterns or anomalies or fun facts": [
+        "some unusual pattern or anomaly or fun fact here...",
+        "another unusual pattern or anomaly or fun fact here..."
+    ]
+}
+```
+
+#### Error Responses
+
+- 400 Bad Request: Missing or invalid domain parameter
+- 401 Unauthorized: Missing or invalid authentication
+- 403 Forbidden: Insufficient permissions
+- 500 Internal Server Error: Server-side error
+
 ## Dashboard
 
 Access your analytics dashboard at `https://your-coho-app-url.codehooks.io | your-domain.com/dashboard`

@@ -351,7 +351,7 @@
                             <template x-for="referer in topReferers" :key="referer.index">
                                 <tr>
                                     <td class="py-1 pr-4">
-                                        <a href="#" @click.prevent="setPageFilter('referer', referer.originalUrl)"
+                                        <a href="#" @click.prevent="setPageFilter('referer', referer.index)"
                                             class="link link-hover">
                                             <span x-text="referer.brand"></span>
                                         </a>
@@ -382,11 +382,17 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="py-1 pr-4">Desktop</td>
+                                <td class="py-1 pr-4">
+                                    <a href="#" @click.prevent="setPageFilter('device', 'desktop')"
+                                            class="link link-hover">Desktop</a>
+                                </td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.desktop"></td>
                             </tr>
                             <tr>
-                                <td class="py-1 pr-4">Mobile</td>
+                                <td class="py-1 pr-4">
+                                    <a href="#" @click.prevent="setPageFilter('device', 'mobile')"
+                                            class="link link-hover">Mobile</a>
+                                </td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.mobile"></td>
                             </tr>
                         </tbody>
@@ -408,7 +414,12 @@
                         <tbody>
                             <template x-for="country in topCountries" :key="country.country">
                                 <tr>
-                                    <td class="py-1 pr-4 link link-hover" x-text="country.country"></td>
+                                    <td class="py-1 pr-4 link">
+                                        <a href="#" @click.prevent="setPageFilter('country', country.country)"
+                                            class="link link-hover">
+                                            <span x-text="country.country"></span>
+                                        </a>
+                                    </td>
                                     <td class="text-sm text-gray-500 text-right" x-text="country.views"></td>
                                 </tr>
                             </template>
@@ -436,7 +447,12 @@
                     <tbody>
                         <template x-for="event in topEvents" :key="event.event">
                             <tr>
-                                <td class="py-1 pr-4" x-text="event.event"></td>
+                                <td class="py-1 pr-4">
+                                    <a href="#" @click.prevent="setPageFilter('event', event.event)"
+                                            class="link link-hover">
+                                        <span x-text="event.event"></span>
+                                    </a>
+                                </td>
                                 <td class="text-sm text-gray-500 text-right" x-text="event.count"></td>
                                 <td class="text-sm text-gray-500 text-right" x-text="event.conversionRate"></td>
                             </tr>

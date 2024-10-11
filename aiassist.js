@@ -120,9 +120,7 @@ export async function aiassist(req, res) {
         const domain = req.query.domain;
         const kvstore = await datastore.open();
         const cachedInsights = await kvstore.get('aiassist', {keyspace: `${domain}-aiassist`});
-        console.log('cached insights', cachedInsights);
         if (cachedInsights) {
-            console.log('serve cached insights');
             return res.json(JSON.parse(cachedInsights));
         }
         // fetch traffic data from database
@@ -132,7 +130,6 @@ export async function aiassist(req, res) {
         insightsObj.lastUpdated = new Date().toISOString();
         
         // cache the insights in the database for 1 hour
-        console.log('new insights', insightsObj);
         await kvstore.set('aiassist', JSON.stringify(insightsObj), { ttl: 60 * 60 * 1000, keyspace: `${domain}-aiassist` });
         
         res.json(insightsObj);
