@@ -396,6 +396,11 @@ The `OPENAI_API_KEY` is an environment variable used to authenticate requests to
 
 You can get an API key from [OpenAI](https://platform.openai.com/api-keys).
 
+To set up the `OPENAI_API_KEY`:
+```
+coho set-env OPENAI_API_KEY 'your_api_key_here' --encrypted
+```
+
 ### JWT_ACCESS_TOKEN_SECRET
 
 The `JWT_ACCESS_TOKEN_SECRET` is an environment variable used to sign and verify JSON Web Tokens (JWTs) for user authentication.
