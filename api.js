@@ -83,6 +83,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
   let topReferers = {};
   let topCountries = {};
   let topEvents = {};
+  let eventSessions = {}; // New object to track sessions for each event
   let sessionCountries = new Map();
   let geoLocCounts = new Map();
   let desktopSessions = 0;
@@ -139,9 +140,13 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
         topCountries[item.geoCountryName] = (topCountries[item.geoCountryName] || 0) + 1;
       }
     }
-    // calculate top events
+    // calculate top events and track sessions for each event
     if (item.event && item.event !== 'page_exit') {
       topEvents[item.event] = (topEvents[item.event] || 0) + 1;
+      if (!eventSessions[item.event]) {
+        eventSessions[item.event] = new Set();
+      }
+      eventSessions[item.event].add(item.sessionId);
     }
     // calculate page hits
     if (!pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`]) {
@@ -221,6 +226,16 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     return { geoloc: { lat: parseFloat(lat), lon: parseFloat(lon) }, count };
   });
 
+  // Calculate event conversion rates
+  const eventConversionRates = Object.entries(topEvents).map(([event, count]) => {
+    const sessionsWithEvent = eventSessions[event].size;
+    const conversionRate = ((sessionsWithEvent / uniqueUsers.size) * 100).toFixed(2);
+    return { event, count, conversionRate: `${conversionRate}%` };
+  });
+
+  // Sort eventConversionRates by count (descending)
+  eventConversionRates.sort((a, b) => b.count - a.count);
+
   return {
     uniqueUsers: uniqueUsers.size,
     totalPageViews,
@@ -231,7 +246,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     topPages: topPagesArray,
     topReferers: topReferersArray,
     topCountries: topCountriesArray,
-    topEvents: topEventsArray,
+    topEvents: eventConversionRates, // Replace the old topEvents with the new one including conversion rates
     geoLocCounts: geoLocArray,
     deviceTypes: {
       desktop: desktopSessions,

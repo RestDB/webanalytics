@@ -47,6 +47,7 @@ Here's the web analytics data: ${JSON.stringify(data)}.
 
 Please provide the output in pure JSON format (no other text or markup) like this: 
 {
+    "ingress": "TLTR: 1-2 sentences",
     "recommendations": [
         "Recommendation 1",
         "Recommendation 2",
@@ -74,7 +75,7 @@ Please provide the output in pure JSON format (no other text or markup) like thi
 `.trim().replaceAll('```json', '').replaceAll('```', '')
             }
         ],
-        temperature: 0,
+        temperature: 0.5,
         max_tokens: 1000,
     };
 
@@ -127,12 +128,14 @@ export async function aiassist(req, res) {
         // fetch traffic data from database
         const analyticsData = await getAnalyticsData(domain);
         const insights = await analyzeUsagePatterns(analyticsData);
+        const insightsObj = JSON.parse(insights);
+        insightsObj.lastUpdated = new Date().toISOString();
         
         // cache the insights in the database for 1 hour
-        console.log('new insights', insights);
-        await kvstore.set('aiassist', JSON.stringify(insights), { ttl: 60 * 60 * 1000, keyspace: `${domain}-aiassist` });
+        console.log('new insights', insightsObj);
+        await kvstore.set('aiassist', JSON.stringify(insightsObj), { ttl: 60 * 60 * 1000, keyspace: `${domain}-aiassist` });
         
-        res.json(insights);
+        res.json(insightsObj);
     } catch (error) {
         console.error('Error in aiassist:', error);
         return res.status(500).json({ error: 'An error occurred while processing the request' });

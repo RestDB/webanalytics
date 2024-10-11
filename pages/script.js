@@ -84,12 +84,15 @@ function dashboard() {
         query: {},
         filters: [],
         aiassist: {
+            "lastUpdated": new Date().toISOString(),
+            "ingress": "",
             "recommendations": [],
             "summary": "",
             "key insights": [],
             "data-driven recommendations": [],
             "unusual patterns or anomalies or fun facts": []
         },
+        showFullReport: false,  // Add this line
         // Add methods to update data based on period changes
 
         async fetchStats() {
@@ -186,21 +189,10 @@ function dashboard() {
 
                 const statsData = await statsResponse.json();
 
-                // Fetch AI assist data
-                const aiAssistResponse = await fetchWithJWT(aiAssistEndpoint, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // Fetch AI assist data asynchronously
+                this.fetchAIAssistData(aiAssistEndpoint);
 
-                if (!aiAssistResponse.ok) {
-                    throw new Error('Failed to fetch AI assist data');
-                }
-
-                const aiassistData = await aiAssistResponse.json();
-
-                // Update the component state
-                this.aiassist = aiassistData;
+                // Update the component state with stats data
                 this.uniqueUsers = statsData.uniqueUsers;
                 this.totalPageViews = statsData.totalPageViews;
                 // top referrers (Brands) sorted by views
@@ -266,6 +258,28 @@ function dashboard() {
             }
         },
 
+        async fetchAIAssistData(aiAssistEndpoint) {
+            try {
+                const aiAssistResponse = await fetchWithJWT(aiAssistEndpoint, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!aiAssistResponse.ok) {
+                    throw new Error('Failed to fetch AI assist data');
+                }
+
+                const aiassistData = await aiAssistResponse.json();
+
+                // Update the component state
+                this.aiassist = aiassistData;
+            } catch (error) {
+                console.error('Error fetching AI assist data:', error);
+                // Handle error (e.g., show error message to user)
+            }
+        },
+
         updateStats() {
             this.loading = true;
             // Use this.selectedDomain when fetching data
@@ -320,8 +334,8 @@ function dashboard() {
                     datasets: [{
                         label: 'Page Views',
                         data: this.graphData.data,
-                        borderColor: 'rgb(75, 75, 75)',
-                        backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                        //borderColor: 'rgb(75, 75, 75)',
+                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
                         borderWidth: 1, // Add this line to make the stroke thinner
                         //tension: 0.25,
                         fill: true,
@@ -499,7 +513,15 @@ function dashboard() {
             );
             this.query = {};
             this.updateStats();
-        }
+        },
+
+        hasAdditionalContent() {
+            return this.aiassist.summary || 
+                   (this.aiassist.recommendations && this.aiassist.recommendations.length > 0) ||
+                   (this.aiassist['key insights'] && this.aiassist['key insights'].length > 0) ||
+                   (this.aiassist['data-driven recommendations'] && this.aiassist['data-driven recommendations'].length > 0) ||
+                   (this.aiassist['unusual patterns or anomalies or fun facts'] && this.aiassist['unusual patterns or anomalies or fun facts'].length > 0);
+        },
     }
 }
 
