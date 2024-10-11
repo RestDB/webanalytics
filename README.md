@@ -138,8 +138,56 @@ pages
 └── script.js  // Alpine.js and API queries for traffic data
 ```
 
+### Dashboard Access
+The analytics dashboard can be accessed at:
+`https://your-coho-app-url.codehooks.io/dashboard` or `your-domain.com/dashboard`
 
 ## API Documentation
+
+**API Overview**
+
+Here's a quick overview of the main API endpoints. For detailed information, please refer to the full [API Documentation](#api-documentation) below.
+
+### Authentication
+All API endpoints require authentication using either a JWT Bearer token or an API key.
+
+#### Headers
+- `Authorization: Bearer <jwt_token>`
+- or
+- `x-apikey: <your_api_key>`
+
+### Endpoints
+
+1. [Get Aggregated Statistics](#get-aggregated-statistics)
+   - Method: GET
+   - Endpoint: `/api/aggstats/:from/:to`
+   - Query Parameters:
+     - `domain`: The domain to filter statistics for
+   - Description: Provides aggregated statistics for a specified date range
+
+2. [Post Traffic Data](#post-traffic-data-programmatically)
+   - Method: POST
+   - Endpoint: `/api/stats`
+   - Query Parameters:
+     - `domain`: The domain to post statistics for
+   - Body: JSON object containing traffic data
+   - Description: Allows posting traffic data programmatically
+
+3. [Get AI Assist Insights](#get-ai-assist-insights)
+   - Method: GET
+   - Endpoint: `/api/aiassist`
+   - Query Parameters:
+     - `domain`: The domain to generate insights for
+   - Description: Provides AI-generated insights and recommendations based on analytics data
+
+4. [Create User](#create-user)
+   - Method: POST
+   - Endpoint: `/auth/createuser`
+   - Headers:
+     - `x-apikey: <your_api_key>`
+   - Body: JSON object with `username` and `password`
+   - Description: Creates a new user account
+
 
 ### Get aggregated Statistics
 
@@ -371,6 +419,58 @@ Example response:
 - 401 Unauthorized: Missing or invalid authentication
 - 403 Forbidden: Insufficient permissions
 - 500 Internal Server Error: Server-side error
+
+### Create User
+
+Endpoint: `POST /auth/createuser`
+
+This endpoint allows you to create a new user account.
+
+#### Headers:
+
+- `x-apikey`: Your API key
+
+#### Body:
+
+JSON object with the following properties:
+- `username`: The email address of the new user
+- `password`: The password for the new user
+
+#### Request:
+
+```
+POST https://your-coho-app-url.codehooks.io/auth/createuser
+Content-Type: application/json
+x-apikey: YOUR_API_KEY
+
+{
+    "username": "user@example.com",
+    "password": "SecurePassword123!"
+}
+```
+
+#### Response:
+
+```json
+{
+  "id": "user_1234567890",
+  "username": "user@example.com",
+  "created": "2024-02-14T12:34:56Z"
+}
+```
+
+#### Error Responses:
+
+- 400 Bad Request: Missing or invalid username or password
+- 401 Unauthorized: Invalid API key
+- 409 Conflict: Username already exists
+- 500 Internal Server Error: Server-side error
+
+#### Notes:
+
+- The password should be sufficiently strong. It's recommended to use a combination of uppercase and lowercase letters, numbers, and special characters.
+- For security reasons, the password is not returned in the response.
+- This endpoint should only be used by administrators to create new accounts. Regular user registration should be handled through a separate, rate-limited endpoint.
 
 ## Dashboard
 

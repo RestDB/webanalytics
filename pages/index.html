@@ -230,7 +230,7 @@
                 <div class="prose">
                     <!-- Ingress (always visible) -->
                     <div class="mb-4">
-                        <p x-text="`${aiassist.ingress ? 'TLTR: '+aiassist.ingress : 'No AI insights available at this time.'}`"></p>
+                        <p x-text="`${aiassist.ingress ? 'TLDR:&nbsp;'+aiassist.ingress : 'No AI insights available at this time.'}`"></p>
                         <a href="#" @click.prevent="showFullReport = !showFullReport" class="text-blue-600 hover:underline" x-show="hasAdditionalContent()">
                             <span x-text="showFullReport ? 'Hide full report' : 'Read more'"></span>
                         </a>
