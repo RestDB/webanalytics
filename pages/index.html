@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard</title>
+    <title>Codehooks Analytics Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.3/dist/full.css" rel="stylesheet" type="text/css" />
     <link href="output.css" rel="stylesheet" type="text/css" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -51,7 +51,10 @@
                     </template>
                 </ul>
             </div>
-            <a class="btn btn-ghost text-xl">Analytics</a>
+            <a class="btn btn-ghost text-xl">
+                <span class="hidden md:inline">Codehooks Analytics</span>
+                <span class="md:hidden">Codehooks</span>
+            </a>
         </div>
 
         <div class="navbar-end">
@@ -190,9 +193,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-base">Bounce</td>
+                        <td class="text-base">Bounce rate</td>
                         <td class="text-base text-right">
-                            <span x-show="!loading" x-text="`${bounceRate}&nbsp;%`" class="text-info"></span>
+                            <span x-show="!loading" x-text="`${bounceRate} %`" class="text-info"></span>
                             <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                         </td>
                     </tr>

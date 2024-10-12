@@ -3,22 +3,12 @@ import fetch from 'node-fetch';
 import { datastore } from 'codehooks-js'
 import {calculateAggregatedStats} from './api.js';
 
-async function initOpenAI() {
-    try {
-        console.log('Initializing OpenAI');
-        return new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
-    } catch (error) {
-        console.error('Error initializing OpenAI:', error);
-        throw new Error('Failed to initialize OpenAI client');
-    }
-}
-
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Updated analyzeUsagePatterns function
 async function analyzeUsagePatterns(data) {
-    const openai = await initOpenAI();
     const settings = {
         model: "gpt-4o-mini",
         messages: [

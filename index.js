@@ -4,7 +4,6 @@
 import { app, datastore } from 'codehooks-js'
 import analyticsScript from './analytics-script.js';
 import { aggregateWorker, trackerWorker } from './workers.js';
-import { mapRoute } from './map.js';
 import { getAggregatedStats, createStats } from './api.js';
 import { generatePixel } from './utils.js';
 import { initAuth } from 'codehooks-auth'
