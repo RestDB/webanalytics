@@ -139,9 +139,11 @@ pages
 └── script.js  // Alpine.js and API queries for traffic data
 ```
 
-### Dashboard Access
+## Dashboard Access
 The analytics dashboard can be accessed at:
 `https://your-coho-app-url.codehooks.io/dashboard` or `your-domain.com/dashboard`
+
+
 
 ## API Documentation
 
@@ -472,10 +474,6 @@ x-apikey: YOUR_API_KEY
 - The password should be sufficiently strong. It's recommended to use a combination of uppercase and lowercase letters, numbers, and special characters.
 - For security reasons, the password is not returned in the response.
 - This endpoint should only be used by administrators to create new accounts. Regular user registration should be handled through a separate, rate-limited endpoint.
-
-## Dashboard
-
-Access your analytics dashboard at `https://your-coho-app-url.codehooks.io | your-domain.com/dashboard`
 
 
 ## Environment Variables
