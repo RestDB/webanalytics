@@ -1,14 +1,17 @@
-# WebAnalytics
+# Codehooks Analytics
 
-Codehooks Analytics is a custom web analytics tool to track your website(s) traffic. 
-This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics application.
+Codehooks Analytics is an open source web analytics tool to track your website(s) traffic. 
+This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics application itself.
+The application can be deployed as-is, modified, or used as a starting point for your own custom analytics solution.
+
+Codehooks Analytics is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) for the frontend dashboard.
 
 
 ## Features
 
 - Track page views and user interactions
 - User authentication system
-- OpenAI AI Assist for insights and recommendations
+- OpenAI AI Advisor for insights and recommendations
 - Custom event tracking
 - Real-time analytics dashboard
 - Easy integration with your existing websites
@@ -22,11 +25,11 @@ The dashboard provides an overview of the website traffic and user interactions.
 ![Screenshot 1](screenshots/dashboard.png)
 ![Screenshot 1](screenshots/dashboard2.png)
 
-The heatmap shows you where your users are clicking on a world map by the open source solution [OpenStreetMap](https://openstreetmap.org/).
+The heatmap shows you where your users are clicking on a world map. The map is powered by the open source solution [OpenStreetMap](https://openstreetmap.org/).
 
 ![Screenshot 2](screenshots/heatmap.png)
 
-Secure user/password authentication by the open source  package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth)
+Secure user/password authentication by username and password. The authentication is powered by the open source  package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth).
 
 ![Screenshot 3](screenshots/signin.png)
 
