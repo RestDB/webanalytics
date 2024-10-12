@@ -56,7 +56,7 @@ Install the dependencies and set up the project using the following steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/webanalytics.git
+   git clone https://github.com/RestDB/webanalytics.git
    cd webanalytics
    ```
 
@@ -313,10 +313,7 @@ GET https://your-coho-app-url.codehooks.io/api/aggstats/2024-10-05T00/2024-10-05
 | `topReferers` | Array of top referrers with their view counts |
 | `topCountries` | Array of top countries with their view counts |
 | `topEvents` | Array of top events with their trigger counts |
-| `pageViewsPerHour` | Array of page views for each hour (0-23) |
-| `pageViewsPerDayOfWeek` | Array of page views for each day of the week (0-6, where 0 is Sunday) |
-| `pageViewsPerDayOfMonth` | Array of page views for each day of the month (1-31) |
-| `pageViewsPerMonth` | Array of page views for each month (0-11, where 0 is January) |
+| `pageViewsInPeriod` | Object containing page views per hour |
 | `deviceTypes` | Breakdown of visits by device type |
 | `geoLocCounts` | Array of geolocation data with view counts |
 | `geoLocCounts.geoloc` | Object containing latitude and longitude |
@@ -347,12 +344,10 @@ POST https://your-coho-app-url.codehooks.io/api/stats?domain=codehooks.io
 Content-Type: application/json
 
 {
-  "data": {
-    "referer": "https://example.com/login",
-    "event": "Login",
-    "eventData": {
-      "username": "user@example.com"
-    }
+  "referer": "https://example.com/login",
+  "event": "Login",
+  "eventData": {
+    "username": "user@example.com"
   }
 }
 ```
