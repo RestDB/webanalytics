@@ -66,7 +66,7 @@ Install the dependencies and set up the project using the following steps:
    coho init --empty
    ```
 
-### Configuration
+### Configuration and environment variables
 
 1. Set up JWT secrets for authentication:
    ```
