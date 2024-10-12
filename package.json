@@ -6,7 +6,7 @@
   "scripts": {
     "css": "tailwindcss -i ./pages/input.css -o ./pages/output.css",
     "bundle": "esbuild pages/script.js --bundle --outfile=pages/bundle.js",
-    "build": "npm run css && npm run bundle && npm run bundle",
+    "build": "npm run css && npm run bundle",
     "deploy": "npm run build && codehooks deploy && codehooks logs --follow"
   },
   "author": "jones@codehooks.io",

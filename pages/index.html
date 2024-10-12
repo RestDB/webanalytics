@@ -8,10 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.3/dist/full.css" rel="stylesheet" type="text/css" />
     <link href="output.css" rel="stylesheet" type="text/css" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="heatmap.min.js"></script>
     <script src="leaflet-heatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -116,104 +114,107 @@
         </div>
         
         
-        <!-- Unique Users, Active Users, Bounce Rate, and Avg Time Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-            <!-- Combined Card for Mobile -->
-            <div class="card bg-neutral text-neutral-content shadow-xl md:hidden">
-                <div class="card-body">
-                    <table class="w-full">
-                        <tr>
-                            <td class="text-base">People</td>
-                            <td class="text-base text-right">
-                                <span x-show="!loading" x-text="uniqueUsers"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-base">Views</td>
-                            <td class="text-base text-right">
-                                <span x-show="!loading" x-text="totalPageViews"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-base">Bounce</td>
-                            <td class="text-base text-right">
-                                <span x-show="!loading" x-text="`${bounceRate}&nbsp;%`"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-base">Time on Site</td>
-                            <td class="text-base text-right">
-                                <span x-show="!loading"
-                                    x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-base">Events</td>
-                            <td class="text-base text-right">
-                                <span x-show="!loading" x-text="eventCompletions"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                            </td>
-                        </tr>
-                    </table>
+        <!-- Stats for Larger Screens -->
+        <div class="hidden md:flex stats shadow mb-4 bg-neutral text-neutral-content">
+            <div class="stat">
+                <div class="stat-title text-info">Realtime</div>
+                <div class="stat-value">
+                    <span x-show="!loading" x-text="realtimeUsers"></span>
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>                    
+                </div>                
+            </div>
+            <div class="stat">
+                <div class="stat-title text-info">People</div>
+                <div class="stat-value">
+                    <span x-show="!loading" x-text="uniqueUsers"></span>
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                </div>                
+            </div>
+
+            <div class="stat">
+                <div class="stat-title text-info">Views</div>
+                <div class="stat-value">
+                    <span x-show="!loading" x-text="totalPageViews"></span>
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                 </div>
             </div>
 
-            <!-- Individual Cards for Larger Screens -->
-            <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">People</h2>
-                    <p class="text-xl"> <!-- Removed font-bold -->
-                        <span x-show="!loading" x-text="uniqueUsers"></span>
-                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                    </p>
+            <div class="stat">
+                <div class="stat-title text-info">Bounce Rate</div>
+                <div class="stat-value">
+                    <span x-show="!loading" x-text="`${bounceRate}%`"></span>
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                 </div>
             </div>
 
-            <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Views</h2>
-                    <p class="text-xl"> <!-- Removed font-bold -->
-                        <span x-show="!loading" x-text="totalPageViews"></span>
-                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                    </p>
+            <div class="stat">
+                <div class="stat-title text-info">Time on Site</div>
+                <div class="stat-value">
+                    <span x-show="!loading"
+                        x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                 </div>
             </div>
 
-            <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Bounce</h2>
-                    <p class="text-xl"> <!-- Removed font-bold -->
-                        <span x-show="!loading" x-text="`${bounceRate} %`"></span>
-                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Time on Site</h2>
-                    <p class="text-xl"> <!-- Removed font-bold -->
-                        <span x-show="!loading"
-                            x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"></span>
-                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="hidden md:block card bg-neutral text-neutral-content shadow-xl">
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Events</h2>
-                    <p class="text-xl"> <!-- Removed font-bold -->
-                        <span x-show="!loading" x-text="eventCompletions"></span>
-                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                    </p>
+            <div class="stat">
+                <div class="stat-title text-info">Events</div>
+                <div class="stat-value">
+                    <span x-show="!loading" x-text="eventCompletions"></span>
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                 </div>
             </div>
         </div>
+        <!-- Stats for Smaller Screens -->
+        <div class="card bg-neutral text-neutral-content shadow-xl md:hidden">
+            <div class="card-body">
+                <table class="w-full">
+                    <tr>
+                        <td class="text-base">Realtime</td>
+                        <td class="text-base text-right">
+                            <span x-show="!loading" x-text="realtimeUsers" class="text-info"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-base">People</td>
+                        <td class="text-base text-right">
+                            <span x-show="!loading" x-text="uniqueUsers" class="text-info"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-base">Views</td>
+                        <td class="text-base text-right">
+                            <span x-show="!loading" x-text="totalPageViews" class="text-info"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-base">Bounce</td>
+                        <td class="text-base text-right">
+                            <span x-show="!loading" x-text="`${bounceRate}&nbsp;%`" class="text-info"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-base">Time on Site</td>
+                        <td class="text-base text-right">
+                            <span x-show="!loading"
+                                x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`" class="text-info"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-base">Events</td>
+                        <td class="text-base text-right">
+                            <span x-show="!loading" x-text="eventCompletions" class="text-info"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
         <!-- AI Assist -->
         <div class="card bg-base-100 shadow-xl mb-4">
             <div class="card-body">
