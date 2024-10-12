@@ -13,13 +13,14 @@ WebAnalytics is a custom web analytics tool to track your website traffic. This 
 - Supports multiple domains
 - Geolocation data
 
-## Screenshots
+## Dashboard Screenshots
 
 The dashboard provides an overview of the website traffic and user interactions.
 
 ![Screenshot 1](screenshots/dashboard.png)
+![Screenshot 1](screenshots/dashboard2.png)
 
-The heatmap shows you where your users are clicking on a world map by the open source solution [OpenLayers](https://openlayers.org/).
+The heatmap shows you where your users are clicking on a world map by the open source solution [OpenStreetMap](https://openstreetmap.org/).
 
 ![Screenshot 2](screenshots/heatmap.png)
 
