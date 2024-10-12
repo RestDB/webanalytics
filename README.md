@@ -1,6 +1,7 @@
 # WebAnalytics
 
-WebAnalytics is a custom web analytics tool to track your website traffic. This self-hosted (https://codehooks.io) solution gives you full control over your data and analytics.
+Codehooks Analytics is a custom web analytics tool to track your website(s) traffic. 
+This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics application.
 
 
 ## Features

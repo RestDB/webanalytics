@@ -83,7 +83,7 @@
   function dashboard() {
     return {
       loading: true,
-      realtimeUsers: 0,
+      realtimeUsers: 6,
       period: "day",
       uniqueUsers: 0,
       totalPageViews: 0,
