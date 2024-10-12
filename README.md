@@ -81,9 +81,10 @@ Install the dependencies and set up the project using the following steps:
    ```
    Note the token output for future use.
 
-3. Create a user collection:
+3. Create a user and a traffic collection:
    ```
    coho createcollection users
+   coho createcollection traffic
    ```
 4. Configure the Geolocation API token `IPINFO_TOKEN` environment variable:
    Sign up for an account at [ipinfo.io](https://ipinfo.io/). They offer a free tier that should be more than enough for personal use.
