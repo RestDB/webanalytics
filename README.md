@@ -2,6 +2,7 @@
 
 WebAnalytics is a custom web analytics tool to track your website traffic. This self-hosted (https://codehooks.io) solution gives you full control over your data and analytics.
 
+
 ## Features
 
 - Track page views and user interactions
@@ -28,13 +29,26 @@ Secure user/password authentication by the open source  package [codehooks-auth]
 
 ![Screenshot 3](screenshots/signin.png)
 
-## Prerequisites
+## Installation and Setup
+
+Install the dependencies and set up the project using the following steps:
+1. [Install Node.js and npm](#prerequisites)
+2. [Install the Codehooks CLI](#prerequisites)
+3. [Clone the repository](#installation)
+4. [Install the dependencies](#installation)
+5. [Set up the environment variables](#configuration)
+6. [Deploy the application](#deploying-the-application)
+7. [Create a new user](#creating-a-new-user)
+8. [Integrate the Web Analytics Client JavaScript](#integrating-the-web-analytics-client-javascript)
+9. [Access the dashboard](#dashboard-access)
+
+### Prerequisites
 
 - Node.js (v14 or later)
 - npm (v6 or later)
 - A [Codehooks.io](https://codehooks.io/) account for backend services
 
-## Installation
+### Installation
 
 1. Clone the repository:
    ```
@@ -52,7 +66,7 @@ Secure user/password authentication by the open source  package [codehooks-auth]
    coho init --empty
    ```
 
-## Configuration
+### Configuration
 
 1. Set up JWT secrets for authentication:
    ```
@@ -141,9 +155,7 @@ pages
 
 ## Dashboard Access
 The analytics dashboard can be accessed at:
-`https://your-coho-app-url.codehooks.io/dashboard` or `your-domain.com/dashboard`
-
-
+`https://your-coho-app-url.codehooks.io` or `your-domain.com`
 
 ## API Documentation
 
@@ -190,7 +202,6 @@ All API endpoints require authentication using either a JWT Bearer token or an A
      - `x-apikey: <your_api_key>`
    - Body: JSON object with `username` and `password`
    - Description: Creates a new user account
-
 
 ### Get aggregated Statistics
 
@@ -474,7 +485,6 @@ x-apikey: YOUR_API_KEY
 - The password should be sufficiently strong. It's recommended to use a combination of uppercase and lowercase letters, numbers, and special characters.
 - For security reasons, the password is not returned in the response.
 - This endpoint should only be used by administrators to create new accounts. Regular user registration should be handled through a separate, rate-limited endpoint.
-
 
 ## Environment Variables
 
