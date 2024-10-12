@@ -1,6 +1,6 @@
 # Codehooks Analytics
 
-Codehooks Analytics is an open source web analytics tool to track your website(s) traffic. 
+Codehooks Analytics is an open source web analytics tool to track any website(s) and application(s) traffic. 
 This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics application itself.
 The application can be deployed as-is, modified, or used as a starting point for your own custom analytics solution.
 
