@@ -1,10 +1,18 @@
 # Codehooks Analytics
 
 Codehooks Analytics is an open source web analytics tool to track any website(s) and application(s) traffic.
-This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics dashboard application itself.
-The application can be deployed as-is, modified, or used as a starting point for your own custom analytics solution.
+This solution provides complete control over your data and the analytics dashboard application.
+You can deploy the application as-is, customize it to your needs, or use it as a foundation for building your own tailored analytics solution.
 
-Traffic analysis is crucial for understanding user behavior, optimizing user experience, and making data-driven decisions. By having full control over your analytics data and applications, you ensure data privacy, compliance with regulations, and the ability to customize analytics to your specific needs. This level of control allows you to gain deeper insights, protect sensitive information, and adapt your analytics strategy as your business evolves, without relying on third-party services that may have limitations or privacy concerns.
+For web developers, self-hosted analytics provide several advantages:
+
+1. Detailed insights into user behavior and interaction patterns
+2. Ability to optimize based on specific project data
+3. Customization of metrics to align with project goals
+4. Enhanced data privacy and regulatory compliance control
+5. Flexibility to adapt tracking as the project evolves
+
+Self-hosted solutions allow developers to avoid limitations of third-party services and maintain full control over data collection and analysis.
 
 Codehooks Analytics is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) for the frontend dashboard.
 
