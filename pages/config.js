@@ -1,1 +1,0 @@
-export const DOMAIN_LIST = ['codehooks.io', 'restdb.io', 'local.io'];

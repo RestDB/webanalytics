@@ -1,5 +1,5 @@
 (() => {
-  // pages/cohoapi.js
+  // dashboard/js/cohoapi.js
   async function refreshAccessToken() {
     const response = await fetch("/auth/refreshtoken", {
       method: "POST",
@@ -38,7 +38,7 @@
     return response;
   }
 
-  // pages/utils.js
+  // dashboard/js/utils.js
   function urlToBrandName(url) {
     const brandMap = {
       "baidu.com": "Baidu",
@@ -79,10 +79,10 @@
     return url;
   }
 
-  // pages/config.js
-  var DOMAIN_LIST = ["codehooks.io", "restdb.io", "local.io"];
+  // dashboard/js/config.js
+  var DOMAIN_LIST = ["codehooks.io", "restdb.io"];
 
-  // pages/script.js
+  // dashboard/js/script.js
   function dashboard() {
     return {
       loading: true,

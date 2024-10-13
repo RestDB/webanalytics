@@ -2,10 +2,10 @@
   "name": "webanalytics-q6us",
   "version": "1.0.0",
   "description": "Codehooks backend app",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "css": "tailwindcss -i ./pages/input.css -o ./pages/output.css",
-    "bundle": "esbuild pages/script.js --bundle --outfile=pages/bundle.js",
+    "css": "tailwindcss -i ./dashboard/css/input.css -o ./dashboard/css/output.css",
+    "bundle": "esbuild ./dashboard/js/script.js --bundle --outfile=./dashboard/js/bundle.js",
     "build": "npm run css && npm run bundle",
     "deploy": "npm run build && codehooks deploy && codehooks logs --follow"
   },

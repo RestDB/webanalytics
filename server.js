@@ -2,12 +2,12 @@
 * Web analytics template
 */
 import { app, datastore } from 'codehooks-js'
-import analyticsScript from './analytics-script.js';
-import { aggregateWorker, trackerWorker } from './workers.js';
-import { getAggregatedStats, createStats } from './api.js';
-import { generatePixel } from './utils.js';
+import analyticsScript from './api/analytics-script.js';
+import { aggregateWorker, trackerWorker } from './api/workers.js';
+import { getAggregatedStats, createStats } from './api/api.js';
+import { generatePixel } from './api/utils.js';
 import { initAuth } from 'codehooks-auth'
-import { aiassist } from './aiassist.js';
+import { aiassist } from './api/aiassist.js';
 /*
 Authentication
 */
@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 // setup auth settings
 initAuth(app, settings)
 app.static({route: '/auth', directory: '/auth/assets', default: 'login.html'})
-app.static({route: '/dashboard', directory: '/pages', default: 'index.html'})
+app.static({route: '/dashboard', directory: '/dashboard', default: 'index.html'})
 
 /*
   Data API
