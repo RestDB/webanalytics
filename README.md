@@ -31,16 +31,16 @@ This combination of technologies ensures that developers can quickly grasp the p
 
 The dashboard provides an overview of the website traffic and user interactions.
 
-![Screenshot 1](screenshots/dashboard.png)
-![Screenshot 1](screenshots/dashboard2.png)
+![Screenshot 1](/screenshots/dashboard.png)
+![Screenshot 1](/screenshots/dashboard2.png)
 
 The heatmap shows you where your users are clicking on a world map. The map is powered by the open source solution [OpenStreetMap](https://openstreetmap.org/).
 
-![Screenshot 2](screenshots/heatmap.png)
+![Screenshot 2](/screenshots/heatmap.png)
 
 Secure user/password authentication by username and password. The authentication is powered by the open source  package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth).
 
-![Screenshot 3](screenshots/signin.png)
+![Screenshot 3](/screenshots/signin.png)
 
 ## Installation and Setup
 
