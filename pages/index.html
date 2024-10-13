@@ -46,14 +46,18 @@
                     class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
                     x-show="open">
                     <template x-for="domain in domains" :key="domain">
-                        <li><a x-text="domain" @click="selectedDomain = domain; updateStats(); open = false"></a>
+                        <li>
+                            <a :class="{ 'active': selectedDomain === domain }" x-text="domain" @click="selectedDomain = domain; updateStats(); open = false"></a>
                         </li>
                     </template>
                 </ul>
             </div>
             <a class="btn btn-ghost text-xl">
-                <span class="hidden md:inline">Codehooks Analytics</span>
-                <span class="md:hidden">Codehooks</span>
+                <span class="hidden md:inline">
+                    Codehooks Analytics
+                    <span x-show="selectedDomain" class="text-sm ml-2" x-text="selectedDomain"></span>
+                </span>
+                <span class="md:hidden" x-text="selectedDomain"></span>
             </a>
         </div>
 

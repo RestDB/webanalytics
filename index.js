@@ -41,6 +41,7 @@ app.get('/pixel.gif', async (req, res) => {
   // send request payload to worker queue
   const db = await datastore.open();
   req.timestamp = new Date().toISOString();
+  console.debug('Request topixel.gif', req);
   db.enqueue('TRACKER', { ...req });
 
   // Get the 1x1 transparent GIF and send to client

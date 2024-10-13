@@ -79,6 +79,9 @@
     return url;
   }
 
+  // pages/config.js
+  var DOMAIN_LIST = ["codehooks.io", "restdb.io", "local.io"];
+
   // pages/script.js
   function dashboard() {
     return {
@@ -105,8 +108,8 @@
         mobile: 0
       },
       pageViewsInPeriod: [],
-      domains: ["codehooks.io", "restdb.io"],
-      selectedDomain: null,
+      domains: DOMAIN_LIST,
+      selectedDomain: DOMAIN_LIST[0],
       query: {},
       filters: [],
       aiassist: {

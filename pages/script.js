@@ -1,5 +1,6 @@
 import { fetchWithJWT } from './cohoapi.js';
 import { normalizeUrl, urlToBrandName } from './utils.js';
+import { DOMAIN_LIST } from './config.js';
 
 export function dashboard() {
     return {
@@ -26,8 +27,8 @@ export function dashboard() {
             mobile: 0
         },
         pageViewsInPeriod: [],
-        domains: ['codehooks.io', 'restdb.io'],
-        selectedDomain: null,
+        domains: DOMAIN_LIST,
+        selectedDomain: DOMAIN_LIST[0],
         query: {},
         filters: [],
         aiassist: {

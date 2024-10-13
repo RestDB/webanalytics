@@ -65,7 +65,7 @@ export default (host) => `
   // Initial page load tracking
   window.addEventListener('DOMContentLoaded', function() {
     // Initial page load tracking
-    sendTrackingPixel(document.referrer || null);
+    sendTrackingPixel(document.referrer || document.referrer === '' ? window.location.href : document.referrer);
   });
 
   // Function to track custom events

@@ -25,6 +25,7 @@ export const trackerWorker = async (workerdata, work) => {
         
         const headers = rawData.headers;
         const geo = await getCountryFromIP(headers['x-real-ip']);
+        const referrer = rawData.referrer || headers['referer'];
       
         // Parse user-agent string
         const parser = new UAParser(headers['user-agent']);
@@ -42,7 +43,7 @@ export const trackerWorker = async (workerdata, work) => {
           deviceModel: userAgentInfo.device.model,
           deviceType: userAgentInfo.device.type,
           browserName: userAgentInfo.browser.name,
-          referer: headers['referer'] ? headers['referer'].split('?')[0] : undefined,
+          referer: referrer ? referrer.split('?')[0] : undefined,          
           campaign: undefined,
           campaignSource: undefined,
           apiPath: rawData.apiPath,
@@ -56,10 +57,10 @@ export const trackerWorker = async (workerdata, work) => {
           geoTimezone: geo.timezone,
           timestamp: rawData.timestamp
         };
-    
+        
         // Extract campaign parameters if they exist in the referer
-        if (headers['referer']) {
-          const refererUrl = new url.URL(headers['referer']);
+        if (referrer) {
+          const refererUrl = new url.URL(referrer);
           const campaignParams = {
             utm_campaign: refererUrl.searchParams.get('utm_campaign'),
             utm_source: refererUrl.searchParams.get('utm_source'),
@@ -135,21 +136,7 @@ export const trackerWorker = async (workerdata, work) => {
     
         if (data.via && data.via !== 'null' && data.event !== 'page_exit') {
           await db.enqueue('AGGREGATE', { field: 'referer', value: data.via, domain: data.domain });
-        }
-        /*
-        if (data.sessionId) {
-          await db.enqueue('AGGREGATE', { 
-            field: 'user', 
-            value: data.sessionId, 
-            domain: data.domain, 
-            "history": data.referer, 
-            "geoCountry": data.geoCountry, 
-            "timestamp": data.timestamp, 
-            event: data.event, 
-            eventData: data.eventData,
-            sessionDuration: data.event === 'page_exit' ? data.eventData?.sessionDuration : undefined
-          });
-        }*/
+        }        
         
         if (data.event) {
           await db.enqueue('AGGREGATE', { field: 'event', value: data.event, domain: data.domain });
