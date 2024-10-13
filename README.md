@@ -6,7 +6,7 @@ You can deploy the application as-is, customize it to your needs, or use it as a
 
 This open source approach frees you from the constraints of third-party services. You'll avoid expensive per-event or per-user pricing models, gain real-time access to your data without delays, and eliminate the risk of vendor lock-in. 
 
-This solution is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) for the frontend dashboard. This tech stack is chosen for its simplicity and ease of use, making it straightforward to understand and modify:
+This solution is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) for the frontend dashboard. This tech stack is chosen for its simplicity and ease of use, making it straightforward to understand and modify. You can use codehooks.io's free Developer plan which should work perfectly unless have a very busy site.
 
 - **Codehooks.io**: A serverless backend platform that simplifies API development and database management.
 - **Alpine.js**: A lightweight JavaScript framework for adding interactivity to your frontend with minimal complexity.
@@ -19,7 +19,7 @@ This combination of technologies ensures that developers can quickly grasp the p
 ## Features
 
 - Track page views and user interactions
-- User authentication system
+- User authentication for admin users
 - OpenAI AI Advisor for insights and recommendations
 - Custom event tracking
 - Real-time analytics dashboard
