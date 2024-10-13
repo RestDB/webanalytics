@@ -70,6 +70,20 @@ Install the dependencies and set up the project using the following steps:
    coho init --empty
    ```
 
+### Configuration
+
+The application uses a configuration file located at `pages/config.js`. This file contains important settings for the application.
+
+### Domain List
+
+The `DOMAIN_LIST` constant defines the list of allowed domains for the application:
+
+```javascript
+export const DOMAIN_LIST = ['codehooks.io', 'restdb.io', 'local.io'];
+```
+
+This list specifies the domains that are recognized and supported by the application. You can modify this list to add or remove domains as needed for your specific use case.
+
 ### Configuration and environment variables
 
 1. Set up JWT secrets for authentication:
@@ -102,6 +116,15 @@ Install the dependencies and set up the project using the following steps:
    ```
    coho set-env OPENAI_API_KEY 'your_api_key_here' --encrypted
    ```
+
+6. Configure the Domain List:
+   The application uses a configuration file located at `pages/config.js`. This file contains the `DOMAIN_LIST` constant which defines the list of allowed domains for the application:
+
+   ```javascript
+   export const DOMAIN_LIST = ['example.com', 'example.io', 'example2.com'];
+   ```
+
+   This list specifies the domains that are recognized and supported by the application. You can modify this list to add or remove domains as needed for your specific use case.
 
 ## Usage
 
