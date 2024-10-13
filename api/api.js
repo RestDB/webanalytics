@@ -126,12 +126,15 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
       topPages[normalizedReferer] = (topPages[normalizedReferer] || 0) + 1;
     }
     // calculate top referrers
+    
     if (item.via) {
       if (item.via.indexOf(domain) > 0) {
         item.via = 'Direct';
       }
+      
       topReferers[item.via] = (topReferers[item.via] || 0) + 1;
     }
+    
     // calculate top countries (unique sessions per country)
     if (item.geoCountryName) {
       if (!sessionCountries.has(item.sessionId)) {

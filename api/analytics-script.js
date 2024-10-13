@@ -28,14 +28,16 @@ export default (host) => `
   function sendTrackingPixel(url, eventName = null, eventData = null) {
     const img = new Image();
     let pixelUrl = 'https://${host}/pixel.gif?r=' + encodeURIComponent(url) + '&sid=' + sessionId;
-    
-    if (eventName) {
-      pixelUrl += '&event=' + encodeURIComponent(eventName);
+    try {
+      if (eventName) {
+        pixelUrl += '&event=' + encodeURIComponent(eventName);
+      }
+      if (eventData) {
+        pixelUrl += '&data=' + encodeURIComponent(JSON.stringify(eventData));
+      }
+    } catch (e) {
+      console.error('Error sending tracking event:', e);
     }
-    if (eventData) {
-      pixelUrl += '&data=' + encodeURIComponent(JSON.stringify(eventData));
-    }
-    
     img.src = pixelUrl;
     img.width = 0;
     img.height = 0;
@@ -65,7 +67,7 @@ export default (host) => `
   // Initial page load tracking
   window.addEventListener('DOMContentLoaded', function() {
     // Initial page load tracking
-    sendTrackingPixel(document.referrer || document.referrer === '' ? window.location.href : document.referrer);
+    sendTrackingPixel(document.referrer || null);
   });
 
   // Function to track custom events
