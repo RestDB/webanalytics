@@ -160,6 +160,38 @@ Add the following script tag to your website's HTML:
 <script src="https://your-coho-app-url.codehooks.io/script.js" referrerpolicy="no-referrer-when-downgrade"></script>
 ```
 
+### Tracking Custom Events
+
+Once you've integrated the analytics script, you can track custom events using the `trackCustomEvent` function. This allows you to capture specific user interactions or important events on your website.
+
+To track a custom event, use the following JavaScript function:
+
+```javascript
+trackCustomEvent(eventName, eventData);
+```
+
+Parameters:
+- `eventName` (string): The name of the custom event you want to track.
+- `eventData` (object, optional): Additional data associated with the event.
+
+Example usage:
+
+```javascript
+// Track a simple event
+trackCustomEvent('ButtonClick');
+
+// Track an event with additional data
+trackCustomEvent('Purchase', {
+  productId: '12345',
+  price: 49.99,
+  currency: 'USD'
+});
+```
+
+You can call this function anywhere in your JavaScript code after the analytics script has loaded. It's particularly useful for tracking user interactions like form submissions, button clicks, or any other important actions on your website.
+
+The tracked events will appear in your analytics dashboard, allowing you to analyze user behavior and gather insights about how visitors interact with your website.
+
 ## The Dashboard Application
 
 The dashboard application is an [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) application that provides a detailed view of the website traffic and user interactions. It is deployed with the rest of the app under the `/dashboard` route:
@@ -176,6 +208,9 @@ pages
 ├── output.css // TailwindCSS
 └── script.js  // Alpine.js and API queries for traffic data
 ```
+Chack out the dashboard in mobile view:
+
+![Screenshot 4](screenshots/dashboard-mobile.png)
 
 ## Dashboard Access
 The analytics dashboard can be accessed at:
