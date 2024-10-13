@@ -4,11 +4,7 @@ Codehooks Analytics is an open source web analytics tool to track any website(s)
 This solution provides complete control over your data and the analytics dashboard application.
 You can deploy the application as-is, customize it to your needs, or use it as a foundation for building your own tailored analytics solution.
 
-For web and app developers, owning your analytics tech stack is a game-changer. It puts you in full control of your data, allowing for unrestricted access to raw information and the ability to track any user interaction without limitations. This level of control enables deep dives into user behavior, custom analyses, and the freedom to define metrics that truly matter to your product or business model.
-
-By building on this open-source stack, you're not just collecting data – you're optimizing performance, ensuring privacy compliance, and seamlessly integrating analytics into your existing workflows. You can minimize overhead by tailoring data collection to your specific needs, while also maintaining full custody of user data to meet GDPR, CCPA, and other regulatory requirements.
-
-Perhaps most importantly, this approach frees you from the constraints of third-party services. You'll avoid expensive per-event or per-user pricing models, gain real-time access to your data without delays, and eliminate the risk of vendor lock-in. Whether you're implementing A/B tests, scaling your application, or pivoting your strategy, you have the flexibility to adapt and innovate without compromising on insights or user privacy. In essence, this analytics stack becomes a powerful tool in your development arsenal, giving you the agility and control needed in today's fast-paced digital landscape.
+This open source approach frees you from the constraints of third-party services. You'll avoid expensive per-event or per-user pricing models, gain real-time access to your data without delays, and eliminate the risk of vendor lock-in. 
 
 This solution is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) for the frontend dashboard. This tech stack is chosen for its simplicity and ease of use, making it straightforward to understand and modify:
 
