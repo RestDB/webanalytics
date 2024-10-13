@@ -1,10 +1,12 @@
 # Codehooks Analytics
 
-Codehooks Analytics is an open source web analytics tool to track any website(s) and application(s) traffic. 
-This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics application itself.
+Codehooks Analytics is an open source web analytics tool to track any website(s) and application(s) traffic.
+This self-hosted (https://codehooks.io) solution gives you full control over your data and the analytics dashboard application itself.
 The application can be deployed as-is, modified, or used as a starting point for your own custom analytics solution.
 
-Codehooks Analytics is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) for the frontend dashboard.
+Traffic analysis is crucial for understanding user behavior, optimizing user experience, and making data-driven decisions. By having full control over your analytics data and applications, you ensure data privacy, compliance with regulations, and the ability to customize analytics to your specific needs. This level of control allows you to gain deeper insights, protect sensitive information, and adapt your analytics strategy as your business evolves, without relying on third-party services that may have limitations or privacy concerns.
+
+Codehooks Analytics is developed with [Codehooks.io](https://codehooks.io) as the backend service and [Alpine.js](https://alpinejs.dev/), [TailwindCSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/) for the frontend dashboard.
 
 
 ## Features
@@ -40,7 +42,7 @@ Install the dependencies and set up the project using the following steps:
 2. [Install the Codehooks CLI](#prerequisites)
 3. [Clone the repository](#installation)
 4. [Install the dependencies](#installation)
-5. [Set up the environment variables](#configuration)
+5. [Configuration and environment variables](#configuration-and-environment-variables)
 6. [Deploy the application](#deploying-the-application)
 7. [Create a new user](#creating-a-new-user)
 8. [Integrate the Web Analytics Client JavaScript](#integrating-the-web-analytics-client-javascript)
@@ -70,19 +72,6 @@ Install the dependencies and set up the project using the following steps:
    coho init --empty
    ```
 
-### Configuration
-
-The application uses a configuration file located at `pages/config.js`. This file contains important settings for the application.
-
-### Domain List
-
-The `DOMAIN_LIST` constant defines the list of allowed domains for the application:
-
-```javascript
-export const DOMAIN_LIST = ['codehooks.io', 'restdb.io', 'local.io'];
-```
-
-This list specifies the domains that are recognized and supported by the application. You can modify this list to add or remove domains as needed for your specific use case.
 
 ### Configuration and environment variables
 
