@@ -1,11 +1,14 @@
 import { fetchWithJWT } from './cohoapi.js';
 import { normalizeUrl, urlToBrandName } from './utils.js';
-import { DOMAIN_LIST } from './config.js';
+import { DOMAIN_LIST, DASHBOARD_TITLE, REALTIME_USERS_INTERVAL } from './config.js';
+
+let realtimeUsersInterval = null; // interval handle for fetching realtime users
 
 export function dashboard() {
     return {
+        title: DASHBOARD_TITLE,
         loading: true,
-        realtimeUsers: 6,
+        realtimeUsers: 0,
         period: 'day',
         uniqueUsers: 0,
         totalPageViews: 0,
@@ -122,8 +125,7 @@ export function dashboard() {
 
                 // Define the endpoints
                 const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}`;
-                const aiAssistEndpoint = `/api/aiassist?domain=${domainToUse}`;
-
+                
                 // Fetch stats data
                 const statsResponse = await fetchWithJWT(statsEndpoint, {
                     headers: {
@@ -138,7 +140,18 @@ export function dashboard() {
                 const statsData = await statsResponse.json();
 
                 // Fetch AI assist data asynchronously
-                this.fetchAIAssistData(aiAssistEndpoint);
+                this.fetchAIAssistData(`/api/aiassist?domain=${domainToUse}`);
+
+                // Fetch realtime users asynchronously
+                if (realtimeUsersInterval) {
+                    clearInterval(realtimeUsersInterval);
+                }
+                // Run fetchRealtimeUsers immediately
+                this.fetchRealtimeUsers(`/api/activeusers?domain=${domainToUse}`);
+                // Then set up the interval to run every 10 seconds
+                realtimeUsersInterval = setInterval(() => {
+                    this.fetchRealtimeUsers(`/api/activeusers?domain=${domainToUse}`);
+                }, REALTIME_USERS_INTERVAL);
 
                 // Update the component state with stats data
                 this.uniqueUsers = statsData.uniqueUsers;
@@ -226,6 +239,29 @@ export function dashboard() {
                 console.error('Error fetching AI assist data:', error);
                 // Handle error (e.g., show error message to user)
             }
+        },
+
+        async fetchRealtimeUsers(realtimeUsersEndpoint) {
+            try {
+                const realtimeUsersResponse = await fetchWithJWT(realtimeUsersEndpoint, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!realtimeUsersResponse.ok) {
+                    throw new Error('Failed to fetch realtime users data');
+                }
+
+                const realtimeUsersData = await realtimeUsersResponse.json();
+
+                // Update the component state
+                this.realtimeUsers = realtimeUsersData.activeUsers;
+
+            } catch (error) {
+                console.error('Error fetching realtime users:', error);
+            }
+            // poll for realtime users using the interval from config
         },
 
         async updateStats() {
@@ -472,3 +508,7 @@ export function dashboard() {
 
   // Make the dashboard function available to the global scope
   window.dashboard = dashboard;
+
+
+
+

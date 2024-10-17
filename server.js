@@ -4,7 +4,7 @@
 import { app, datastore } from 'codehooks-js'
 import analyticsScript from './api/analytics-script.js';
 import { aggregateWorker, trackerWorker } from './api/workers.js';
-import { getAggregatedStats, createStats } from './api/api.js';
+import { getAggregatedStats, createStats, getActiveUsers } from './api/api.js';
 import { generatePixel } from './api/utils.js';
 import { initAuth } from 'codehooks-auth'
 import { aiassist } from './api/aiassist.js';
@@ -84,7 +84,7 @@ app.static({route: '/dashboard', directory: '/dashboard', default: 'index.html'}
 app.get('/api/aggstats/:from/:to', getAggregatedStats);
 app.post('/api/stats', createStats);
 app.get('/api/aiassist', aiassist);
-
+app.get('/api/activeusers', getActiveUsers);
 /* 
   Bind application to serverless runtime
 */

@@ -272,3 +272,35 @@ function parseDateRange(from, to) {
   return { fromYear, fromMonth, fromDay, fromHour, toYear, toMonth, toDay, toHour };
 }
 
+// Add this function after the existing functions
+export async function getActiveUsers(req, res) {
+  try {
+    const { domain } = req.query;
+    const activeUsers = await calculateActiveUsers(domain);
+    res.json({ activeUsers });
+  } catch (error) {
+    console.error('Error in getActiveUsers:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+async function calculateActiveUsers(domain) {
+  const db = await datastore.open();
+  const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString();
+
+  const query = {
+    domain,
+    "timestamp": { $gte: threeMinutesAgo },
+    "event": {$not: "page_exit"}
+  };
+  console.debug('calculateActiveUsers query', query);
+  const cursor = db.getMany('traffic', query);
+  const activeUsers = new Set();
+
+  await cursor.forEach((item) => {
+    console.debug('calculateActiveUsers item', item);
+    activeUsers.add(item.sessionId);
+  });
+
+  return activeUsers.size;
+}

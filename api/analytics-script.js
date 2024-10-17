@@ -55,7 +55,7 @@ export default (host) => `
 
   // Function to track URL changes
   function trackUrlChange() {
-    sendTrackingPixel(window.location.href);
+    sendTrackingPixel(document.referrer || window.location.href);
   }
 
   // Listen for URL changes
@@ -67,13 +67,13 @@ export default (host) => `
   // Initial page load tracking
   window.addEventListener('DOMContentLoaded', function() {
     // Initial page load tracking
-    sendTrackingPixel(document.referrer || null);
+    sendTrackingPixel(document.referrer || window.location.href);
   });
 
   // Function to track custom events
   function trackCustomEvent(eventName, eventData = {}) {
     console.log('Custom event:', eventName, eventData);
-    sendTrackingPixel(window.location.href, eventName, eventData);
+    sendTrackingPixel(document.referrer || window.location.href, eventName, eventData);
   }
 
   // Expose trackCustomEvent to the global scope
@@ -117,7 +117,7 @@ export default (host) => `
     const sessionEndTime = new Date();
     const sessionDuration = sessionEndTime - sessionStartTime;
     
-    sendTrackingPixel(window.location.href, 'page_exit', { sessionDuration });
+    sendTrackingPixel(document.referrer || window.location.href, 'page_exit', { sessionDuration });
   }
 
   // Listen for page exit
