@@ -75,6 +75,7 @@
                     class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
                     x-show="open" @click.away="open = false">
                     <li><a :class="{ 'active': period === 'day' }" @click="period = 'day'; updateStats(); open = false">Today</a></li>
+                    <li><a :class="{ 'active': period === 'yesterday' }" @click="period = 'yesterday'; updateStats(); open = false">Yesterday</a></li>
                     <li><a :class="{ 'active': period === 'last2days' }" @click="period = 'last2days'; updateStats(); open = false">2D</a></li>
                     <li><a :class="{ 'active': period === 'last7days' }" @click="period = 'last7days'; updateStats(); open = false">7D</a></li>
                     <li><a :class="{ 'active': period === 'last30days' }" @click="period = 'last30days'; updateStats(); open = false">30D</a></li>
@@ -84,6 +85,7 @@
             </div>
             <ul class="menu menu-horizontal px-1 hidden lg:flex">
                 <li><a :class="{ 'active': period === 'day' }" @click="period = 'day'; updateStats()">Today</a></li>
+                <li><a :class="{ 'active': period === 'yesterday' }" @click="period = 'yesterday'; updateStats()">Yesterday</a></li>
                 <li><a :class="{ 'active': period === 'last2days' }"
                         @click="period = 'last2days'; updateStats()">2D</a></li>
                 <li><a :class="{ 'active': period === 'last7days' }"

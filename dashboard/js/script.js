@@ -103,6 +103,10 @@ export function dashboard() {
                         fromPeriodStr = todayStr;
                         toPeriodStr = nowStr;
                         break;
+                    case 'yesterday':
+                        fromPeriodStr = yesterdayStr;
+                        toPeriodStr = yesterdayEndStr;
+                        break;
                     case 'last2days':
                         fromPeriodStr = last2DaysEndStr;
                         toPeriodStr = nowStr;
