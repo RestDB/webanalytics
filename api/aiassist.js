@@ -25,13 +25,15 @@ async function analyzeUsagePatterns(data) {
 3. Popular content: Identify the most visited pages or sections of the website.
 4. User demographics: Examine any available information about user locations, devices, or browsers.
 5. Conversion rates: If applicable, analyze any conversion-related metrics or events.
+6. Hacker attacks: Check for any unusual spikes or patterns that might indicate a hacker attack.
 
 After your analysis, please provide:
 1. Your top 3 clear recommendations for improving the website's performance or user experience.
 2. A summary of the key findings.
-3. At least 5 key insights summarizing your findings.
+3. At least 3 key insights summarizing your findings.
 4. 3 data-driven recommendations for improving website performance or user experience.
 5. Any unusual or interesting patterns or anomalies you've noticed in the data.
+6. A list of protocols and strategies that you think are being used to attack the website.
 
 Here's the web analytics data: ${JSON.stringify(data)}.
 

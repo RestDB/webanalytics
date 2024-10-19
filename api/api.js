@@ -90,6 +90,8 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
   let processedSessions = new Set();
 
   let pageViewsInPeriod = {};
+  let uniqueSessionsInPeriod = {};
+  let uniqueEventsInPeriod = {}; // New object to track unique events per period
 
   await cursor.forEach((item) => {
     // Calculate unique users and total page views
@@ -114,11 +116,6 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
      if ((item.event || null) !== 'page_exit') {
       sessionCounts[item.sessionId] = (sessionCounts[item.sessionId] || 0) + 1;
     }
-
-    // Remove the old session duration calculation
-    // if (item.event === 'page_exit' && item.eventData && item.eventData.sessionDuration) {
-    //   totalSessionDuration += item.eventData.sessionDuration;
-    // }
 
     // Calculate top pages
     if (item.referer) {
@@ -151,11 +148,25 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
       eventSessions[item.event].add(item.sessionId);
     }
     // calculate page hits
-    if (!pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`]) {
-      pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`] = 0;
+    const periodKey = `${item.year}-${item.month}-${item.day}T${item.hour}:00`;
+    if (!pageViewsInPeriod[periodKey]) {
+      pageViewsInPeriod[periodKey] = 0;
     }
-    pageViewsInPeriod[`${item.year}-${item.month}-${item.day}T${item.hour}:00`]++;
-    
+    pageViewsInPeriod[periodKey]++;
+
+    // Calculate unique sessions per period
+    if (!uniqueSessionsInPeriod[periodKey]) {
+      uniqueSessionsInPeriod[periodKey] = new Set();
+    }
+    uniqueSessionsInPeriod[periodKey].add(item.sessionId);
+
+    // Calculate unique events per period
+    if (item.event && item.event !== 'page_exit') {
+      if (!uniqueEventsInPeriod[periodKey]) {
+        uniqueEventsInPeriod[periodKey] = new Set();
+      }
+      uniqueEventsInPeriod[periodKey].add(item.event);
+    }
     
     // caclulate unique geolocations, and count for each geolocation, "geoLoc": "1.2897,103.8501", 
     if (item.geoLoc) {
@@ -238,6 +249,16 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
   // Sort eventConversionRates by count (descending)
   eventConversionRates.sort((a, b) => b.count - a.count);
 
+  // Convert uniqueSessionsInPeriod from Sets to counts
+  const uniqueSessionCounts = Object.fromEntries(
+    Object.entries(uniqueSessionsInPeriod).map(([key, set]) => [key, set.size])
+  );
+
+  // Convert uniqueEventsInPeriod from Sets to counts
+  const uniqueEventCounts = Object.fromEntries(
+    Object.entries(uniqueEventsInPeriod).map(([key, set]) => [key, set.size])
+  );
+
   return {
     uniqueUsers: uniqueUsers.size,
     totalPageViews,
@@ -254,7 +275,9 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
       desktop: desktopSessions,
       mobile: mobileSessions
     },
-    pageViewsInPeriod
+    pageViewsInPeriod,
+    uniqueSessionsInPeriod: uniqueSessionCounts,
+    uniqueEventsInPeriod: uniqueEventCounts // Add this new property to the returned object
   };
 }
 

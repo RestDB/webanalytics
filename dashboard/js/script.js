@@ -21,10 +21,18 @@ export function dashboard() {
         topCountries: [],
         topEvents: [],
         geoLocCounts: [],
-        graphData: {
+        pageViewsGraphData: {
             labels: [],
             data: []
         },        
+        uniqueSessionsGraphData: {
+            labels: [],
+            data: []
+        },
+        uniqueEventsGraphData: {
+            labels: [],
+            data: []
+        },
         deviceTypes: {
             desktop: 0,
             mobile: 0
@@ -206,10 +214,20 @@ export function dashboard() {
                 this.bounceRate = statsData.bounceRate;
                 this.averageSessionDuration = statsData.averageSessionDuration;
                 this.eventCompletions = statsData.totalPageEvents;
-                this.pageViewsInPeriod = statsData.pageViewsInPeriod;
-                this.graphData = {
+                this.pageViewsInPeriod = this.fillMissingHours(statsData.pageViewsInPeriod);
+                this.pageViewsGraphData = {
                     labels: Object.keys(this.pageViewsInPeriod).map(date => new Date(date)),
                     data: Object.values(this.pageViewsInPeriod)
+                };
+                this.uniqueSessionsInPeriod = this.fillMissingHours(statsData.uniqueSessionsInPeriod);
+                this.uniqueSessionsGraphData = {
+                    labels: Object.keys(this.uniqueSessionsInPeriod).map(date => new Date(date)),
+                    data: Object.values(this.uniqueSessionsInPeriod)
+                }
+                this.uniqueEventsInPeriod = this.fillMissingHours(statsData.uniqueEventsInPeriod);
+                this.uniqueEventsGraphData = {
+                    labels: Object.keys(this.uniqueEventsInPeriod).map(date => new Date(date)),
+                    data: Object.values(this.uniqueEventsInPeriod)
                 };
                 this.deviceTypes = statsData.deviceTypes;
                 this.geoLocCounts = statsData.geoLocCounts.map(x => {return {lat: x.geoloc.lat, lon: x.geoloc.lon, count: x.count}});
@@ -299,17 +317,36 @@ export function dashboard() {
             this.chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: this.graphData.labels,
+                    labels: this.pageViewsGraphData.labels,
                     datasets: [{
                         label: 'Page Views',
-                        data: this.graphData.data,
+                        data: this.pageViewsGraphData.data,
                         //borderColor: 'rgb(75, 75, 75)',
                         //backgroundColor: 'rgba(0, 0, 128, 0.2)',
                         borderWidth: 1, // Add this line to make the stroke thinner
-                        //tension: 0.25,
+                        tension: 0.1,
                         fill: true,
                         pointRadius: 0
-                    }]
+                    }, 
+                    {
+                        label: 'Unique Users',
+                        data: this.uniqueSessionsGraphData.data,
+                        //borderColor: 'rgb(75, 75, 75)',
+                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                        borderWidth: 1, // Add this line to make the stroke thinner
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Unique Events',
+                        data: this.uniqueEventsGraphData.data,
+                        borderWidth: 1, // Add this line to make the stroke thinner
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 0
+                    }
+                ]
                 },
                 options: {
                     responsive: true,
@@ -498,6 +535,24 @@ export function dashboard() {
                    (this.aiassist['data-driven recommendations'] && this.aiassist['data-driven recommendations'].length > 0) ||
                    (this.aiassist['unusual patterns or anomalies or fun facts'] && this.aiassist['unusual patterns or anomalies or fun facts'].length > 0);
         },
+
+        // Add this new method to the dashboard object
+        fillMissingHours(data) {
+            const filledData = {};
+            const entries = Object.entries(data);
+            
+            if (entries.length < 2) return data;
+
+            const startDate = new Date(entries[0][0]);
+            const endDate = new Date(entries[entries.length - 1][0]);
+
+            for (let d = new Date(startDate); d <= endDate; d.setHours(d.getHours() + 1)) {
+                const key = d.toISOString().slice(0, 13) + ':00';
+                filledData[key] = data[key] || 0;
+            }
+
+            return filledData;
+        },
     }
 }
 
@@ -508,6 +563,7 @@ export function dashboard() {
 
   // Make the dashboard function available to the global scope
   window.dashboard = dashboard;
+
 
 
 
