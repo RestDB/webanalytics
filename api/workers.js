@@ -126,7 +126,7 @@ export const trackerWorker = async (workerdata, work) => {
         // store raw data
         await db.insertOne('rawdata', { ...rawData });
         // Queue aggregation tasks
-       
+       /* 
         await db.enqueue('AGGREGATE', { field: 'user_agent', value: `${data.userAgent}`, domain: data.domain });
         await db.enqueue('AGGREGATE', { field: 'device', value: `${data.osName}, ${data.osVersion}, ${data.deviceVendor}, ${data.deviceModel}, ${data.deviceType}`, domain: data.domain });
         await db.enqueue('AGGREGATE', { field: 'page', value: pageUrl, domain: data.domain });
@@ -140,7 +140,7 @@ export const trackerWorker = async (workerdata, work) => {
         
         if (data.event) {
           await db.enqueue('AGGREGATE', { field: 'event', value: data.event, domain: data.domain });
-        }
+        } */
         
         work.end();
     } catch (error) {

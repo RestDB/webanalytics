@@ -256,7 +256,7 @@ export function dashboard() {
                 const realtimeUsersData = await realtimeUsersResponse.json();
 
                 // Update the component state
-                this.realtimeUsers = realtimeUsersData.activeUsers;
+                this.realtimeUsers = realtimeUsersData.totalActiveUsers;
 
             } catch (error) {
                 console.error('Error fetching realtime users:', error);
