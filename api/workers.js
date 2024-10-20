@@ -24,7 +24,7 @@ export const trackerWorker = async (workerdata, work) => {
         const rawData = workerdata.body.payload;
         
         const headers = rawData.headers;
-        const geo = await getCountryFromIP(headers['x-real-ip']);
+        const geo = await getCountryFromIP(headers['x-real-ip']) || {};
         const referrer = rawData.referrer || headers['referer'];
       
         // Parse user-agent string
@@ -49,12 +49,12 @@ export const trackerWorker = async (workerdata, work) => {
           apiPath: rawData.apiPath,
           originalUrl: rawData.originalUrl,
           params: rawData.params,
-          geoCountry: geo.country,
-          geoCountryName: countries[geo.country]?.name || geo.country,
-          geoCity: geo.region,
-          geoRegion: geo.region,
-          geoLoc: geo.loc,
-          geoTimezone: geo.timezone,
+          geoCountry: geo.country || 'Unknown',
+          geoCountryName: (geo.country && countries[geo.country]?.name) || 'Unknown',
+          geoCity: geo.region || 'Unknown',
+          geoRegion: geo.region || 'Unknown',
+          geoLoc: geo.loc || 'Unknown',
+          geoTimezone: geo.timezone || 'Unknown',
           timestamp: rawData.timestamp
         };
         

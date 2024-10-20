@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "css": "tailwindcss -i ./dashboard/css/input.css -o ./dashboard/css/output.css",
-    "bundle": "esbuild ./dashboard/js/script.js --bundle --minify --outfile=./dashboard/js/bundle.js",
+    "bundle": "esbuild ./dashboard/js/script.js --bundle --outfile=./dashboard/js/bundle.js",
     "build": "npm run css && npm run bundle",
     "deploy": "npm run build && codehooks deploy && codehooks logs --follow"
   },

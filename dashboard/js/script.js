@@ -471,25 +471,29 @@ export function dashboard() {
             
             
             if (this.geoLocCounts.length > 0) {
-                const bounds = L.latLngBounds();
                 this.geoLocCounts.forEach((geoData) => {
-                    const location = L.latLng(geoData.lat, geoData.lon);
-                    bounds.extend(location);
+                    // Check if lat and lon are valid numbers
+                    if (typeof geoData.lat === 'number' && typeof geoData.lon === 'number' && !isNaN(geoData.lat) && !isNaN(geoData.lon)) {
+                        const location = L.latLng(geoData.lat, geoData.lon);
+                        bounds.extend(location);
 
-                    // Create the circle
-                    L.circle(location, {
-                        color: 'black',
-                        fillColor: '#30f',
-                        fillOpacity: 0.1,
-                        radius: 1000
-                    }).addTo(this.mapInstance);
-                    
+                        // Create the circle
+                        L.circle(location, {
+                            color: 'black',
+                            fillColor: '#30f',
+                            fillOpacity: 0.1,
+                            radius: 1000
+                        }).addTo(this.mapInstance);
+                    } else {
+                        console.warn('Invalid coordinates:', geoData);
+                    }
                 });
 
-                // Fit the map to the bounds of all markers
-                //this.mapInstance.fitBounds(bounds);
-                heatmapLayer.setData({data: this.geoLocCounts});
-                //this.mapInstance.addLayer(heatmapLayer);
+                // Only fit bounds if there are valid locations
+                if (bounds.isValid()) {
+                    heatmapLayer.setData({data: this.geoLocCounts});
+                    this.mapInstance.fitBounds(bounds);
+                }
             }
             
         },
@@ -580,6 +584,8 @@ export function dashboard() {
 
   // Make the dashboard function available to the global scope
   window.dashboard = dashboard;
+
+
 
 
 
