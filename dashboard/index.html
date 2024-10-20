@@ -48,7 +48,7 @@
                     x-show="open">
                     <template x-for="domain in domains" :key="domain">
                         <li>
-                            <a :class="{ 'active': selectedDomain === domain }" x-text="domain" @click="selectedDomain = domain; updateStats(); open = false"></a>
+                            <a :class="{ 'active': selectedDomain === domain }" x-text="domain" @click="setSelectedDomain(domain); open = false"></a>
                         </li>
                     </template>
                 </ul>

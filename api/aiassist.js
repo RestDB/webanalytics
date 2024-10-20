@@ -18,14 +18,15 @@ async function analyzeUsagePatterns(data) {
             },
             {
                 role: 'user',
-                content: `I have web analytics data for the periods of the last 48 hours, last 7 days, and last 30 days. Please analyze this data thoroughly and provide detailed insights. Think step by step through the following aspects:
+                content: `I have web analytics data for the periods of the last 30 days. Please analyze this data thoroughly and provide detailed insights. Think step by step through the following aspects:
 
-1. Traffic trends: Analyze how traffic has changed across the three time periods.
-2. User engagement: Look at metrics like session duration, pages per session, and bounce rate.
-3. Popular content: Identify the most visited pages or sections of the website.
-4. User demographics: Examine any available information about user locations, devices, or browsers.
-5. Conversion rates: If applicable, analyze any conversion-related metrics or events.
-6. Hacker attacks: Check for any unusual spikes or patterns that might indicate a hacker attack.
+1. Traffic trends: Analyze how traffic has changed across the period. What's the most popular page, and what events have the highest/lowest conversion rates?
+2. What's driving the traffic? What are the top referrers, and how can we gain more traffic from them?
+3. User engagement: Look at metrics like session duration, pages per session, and bounce rate.
+4. Popular content: Identify the most visited pages or sections of the website.
+5. User demographics: Examine any available information about user locations, devices, or browsers.
+6. Conversion rates: If applicable, analyze any conversion-related metrics or events.
+7. Hacker attacks: Check for any unusual spikes or patterns that might indicate a hacker attack.
 
 After your analysis, please provide:
 1. Your top 3 clear recommendations for improving the website's performance or user experience.
@@ -39,7 +40,7 @@ Here's the web analytics data: ${JSON.stringify(data)}.
 
 Please provide the output in pure JSON format (no other text or markup) like this: 
 {
-    "ingress": "TLDR;1-2 sentences",
+    "ingress": "TLDR; 1-2 sentences",
     "recommendations": [
         "Recommendation 1",
         "Recommendation 2",
@@ -49,9 +50,7 @@ Please provide the output in pure JSON format (no other text or markup) like thi
     "key insights": [
         "Insight 1",
         "Insight 2",
-        "Insight 3",
-        "Insight 4",
-        "Insight 5"
+        "Insight 3"
     ],
     "data-driven recommendations": [
         "Recommendation 1",
@@ -90,8 +89,8 @@ async function getAnalyticsData(domain) {
     };
 
     const periods = {
-        "48-hours": new Date(now.getTime() - 48 * 60 * 60 * 1000),
-        "7-days": new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+        //"48-hours": new Date(now.getTime() - 48 * 60 * 60 * 1000),
+        //"7-days": new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
         "30-days": new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
     };
 

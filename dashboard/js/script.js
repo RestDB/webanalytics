@@ -220,17 +220,17 @@ export function dashboard() {
                 this.eventCompletions = statsData.totalPageEvents;
                 this.pageViewsInPeriod = this.fillMissingHours(statsData.pageViewsInPeriod);
                 this.pageViewsGraphData = {
-                    labels: Object.keys(this.pageViewsInPeriod).map(date => new Date(date)),
+                    labels: Object.keys(this.pageViewsInPeriod).map(date => new Date(date + 'Z')),
                     data: Object.values(this.pageViewsInPeriod)
                 };
                 this.uniqueSessionsInPeriod = this.fillMissingHours(statsData.uniqueSessionsInPeriod);
                 this.uniqueSessionsGraphData = {
-                    labels: Object.keys(this.uniqueSessionsInPeriod).map(date => new Date(date)),
+                    labels: Object.keys(this.uniqueSessionsInPeriod).map(date => new Date(date + 'Z')),
                     data: Object.values(this.uniqueSessionsInPeriod)
                 }
                 this.uniqueEventsInPeriod = this.fillMissingHours(statsData.uniqueEventsInPeriod);
                 this.uniqueEventsGraphData = {
-                    labels: Object.keys(this.uniqueEventsInPeriod).map(date => new Date(date)),
+                    labels: Object.keys(this.uniqueEventsInPeriod).map(date => new Date(date + 'Z')),
                     data: Object.values(this.uniqueEventsInPeriod)
                 };
                 this.deviceTypes = statsData.deviceTypes;
@@ -368,8 +368,8 @@ export function dashboard() {
                                 },
                                 tooltipFormat: this.getTooltipFormat(),
                                 // Add a parser to adjust for local timezone
-                                parser: (value) => {
-                                    const date = new Date(value);
+                                xxparser: (value) => {
+                                    const date = new Date(value + 'Z');
                                     return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
                                 }
                             },
@@ -547,8 +547,8 @@ export function dashboard() {
             
             if (entries.length < 2) return data;
 
-            const startDate = new Date(entries[0][0]);
-            const endDate = new Date(entries[entries.length - 1][0]);
+            const startDate = new Date(entries[0][0]+'Z');
+            const endDate = new Date(entries[entries.length - 1][0]+'Z');
 
             for (let d = new Date(startDate); d <= endDate; d.setHours(d.getHours() + 1)) {
                 const key = d.toISOString().slice(0, 13) + ':00';
@@ -556,6 +556,19 @@ export function dashboard() {
             }
 
             return filledData;
+        },
+
+        // Add this new method
+        setSelectedDomain(domain) {
+            this.selectedDomain = domain;
+            this.resetFiltersAndQuery();
+            this.updateStats();
+        },
+
+        // Add this new method
+        resetFiltersAndQuery() {
+            this.filters = [];
+            this.query = {};
         },
     }
 }
@@ -567,6 +580,7 @@ export function dashboard() {
 
   // Make the dashboard function available to the global scope
   window.dashboard = dashboard;
+
 
 
 
