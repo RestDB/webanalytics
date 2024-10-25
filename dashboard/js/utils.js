@@ -1,35 +1,34 @@
 // Helper function to convert URL to brand name
 export function urlToBrandName(url) {
     const brandMap = {
-      'baidu.com': 'Baidu',
-      'bing.com': 'Bing',
-      'duckduckgo.com': 'DuckDuckGo',
-      'devhunt.org': 'DevHunt',
-      'facebook.com': 'Facebook',
-      'github.com': 'GitHub',
-      'google.com': 'Google',
-      'instagram.com': 'Instagram',
-      'linkedin.com': 'LinkedIn',
-      'pinterest.com': 'Pinterest',
-      'reddit.com': 'Reddit',
-      'snapchat.com': 'Snapchat',
-      'tiktok.com': 'TikTok',
-      'twitter.com': 'X (Twitter)',
-      'whatsapp.com': 'WhatsApp',
-      'yahoo.com': 'Yahoo',
-      'yandex.ru': 'Yandex',
-      'youtube.com': 'YouTube',
-      't.co': 'X (Twitter)',
-      'android-app://com.google.android.gm': 'Gmail (Android)'
+      'Baidu': 'baidu\\.com',
+      'Bing': 'bing\\.com',
+      'DuckDuckGo': 'duckduckgo\\.com',
+      'DevHunt': 'devhunt\\.org',
+      'Facebook': 'facebook\\.com',
+      'GitHub': 'github\\.com',
+      'Google': 'google\\.',
+      'Instagram': 'instagram\\.com',
+      'LinkedIn': 'linkedin\\.com',
+      'Pinterest': 'pinterest\\.com',
+      'Reddit': 'reddit\\.com',
+      'Snapchat': 'snapchat\\.com',
+      'TikTok': 'tiktok\\.com',
+      'X (Twitter)': 'twitter\\.com|https:\/\/t\\.co',
+      'WhatsApp': 'whatsapp\\.com',
+      'Yahoo': 'yahoo\\.com',
+      'Yandex': 'yandex\\.ru',
+      'YouTube': 'youtube\\.com',
+      'Gmail (Android)': 'android-app://com\\.google\\.android\\.gm'
     };
   
-    for (const [domain, brand] of Object.entries(brandMap)) {
-      if (url.includes(domain)) {
+    for (const [brand, domainPattern] of Object.entries(brandMap)) {
+      if (new RegExp(domainPattern).test(url)) {
         return brand;
       }
     }
-    return url.replace('https://', '');
-  }
+    return url.replace(/^https?:\/\//, '');
+}
 
 // Helper function to convert URL to page name
 

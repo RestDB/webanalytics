@@ -3,7 +3,7 @@
 */
 import { app, datastore } from 'codehooks-js'
 import analyticsScript from './api/analytics-script.js';
-import { aggregateWorker, trackerWorker } from './api/workers.js';
+import { aggregateWorker, trackerWorker, updateAnalyticsWorker } from './api/workers.js';
 import { getAggregatedStats, createStats, getActiveUsers } from './api/api.js';
 import { generatePixel } from './api/utils.js';
 import { initAuth } from 'codehooks-auth'
@@ -62,6 +62,10 @@ app.worker('TRACKER', trackerWorker);
 */
 app.worker('AGGREGATE', aggregateWorker);
 
+/*
+  UPDATEANALYTICS Queue Worker
+*/
+app.worker('UPDATEANALYTICS', updateAnalyticsWorker);
 
 /*
 Serve static assets

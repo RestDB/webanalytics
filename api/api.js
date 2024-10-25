@@ -3,6 +3,10 @@ import get from 'lodash/get';
 import { formatDuration } from './utils.js';
 import { trackerWorker } from './workers.js';
 
+// Add these constants at the top of the file, after the imports
+const CACHE_THRESHOLD_HOURS = 12;
+const CACHE_THRESHOLD_MS = CACHE_THRESHOLD_HOURS * 60 * 60 * 1000;
+
 // Add this function at the top of the file or in a utility module
 function normalizeUrl(url, domain) {
   // Remove protocol (http:// or https://)
@@ -56,6 +60,9 @@ export async function getAggregatedStats(req, res) {
 }
 
 export async function calculateAggregatedStats(from, to, domain, inputquery) {
+  const now = new Date().toISOString();
+  const cacheKeyspace = `stats_${domain}`;
+  
   let query = {
     domain,
     timestamp: {
@@ -68,6 +75,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     query = { ...query, ...inputquery };
   }
   const db = await datastore.open();
+  
   const cursor = db.getMany('traffic', query, {useIndex: 'timestamp', start: from, end: to});
 
   let uniqueUsers = new Set();
@@ -79,6 +87,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
   let sessionStartTimes = {};
   let sessionEndTimes = {};
   let topPages = {};
+  let topPagesSession = {}; // New object to track unique sessions per page
   let topReferers = {};
   let topCountries = {};
   let topEvents = {};
@@ -117,19 +126,26 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
       sessionCounts[item.sessionId] = (sessionCounts[item.sessionId] || 0) + 1;
     }
 
-    // Calculate top pages
+    // Calculate top pages and unique sessions per page
     if (item.referer) {
-      const normalizedReferer = item.referer;//normalizeUrl(item.referer, domain);
-      topPages[normalizedReferer] = (topPages[normalizedReferer] || 0) + 1;
+      const normalizedReferer = item.referer; // normalizeUrl(item.referer, domain);
+      if (!topPages[normalizedReferer]) {
+        topPages[normalizedReferer] = { views: 0, sessions: new Set() };
+      }
+      topPages[normalizedReferer].views++;
+      topPages[normalizedReferer].sessions.add(item.sessionId);
     }
     // calculate top referrers
-    
     if (item.via) {
       if (item.via.indexOf(domain) > 0) {
         item.via = 'Direct';
       }
       
-      topReferers[item.via] = (topReferers[item.via] || 0) + 1;
+      if (!topReferers[item.via]) {
+        topReferers[item.via] = { views: 0, sessions: new Set() };
+      }
+      topReferers[item.via].views++;
+      topReferers[item.via].sessions.add(item.sessionId);
     }
     
     // calculate top countries (unique sessions per country)
@@ -202,10 +218,10 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
 
   // Sort all top categories from highest to lowest and limit to top 10
   topPages = Object.fromEntries(
-    Object.entries(topPages).sort((a, b) => b[1] - a[1])
+    Object.entries(topPages).sort((a, b) => b[1].views - a[1].views)
   );
   topReferers = Object.fromEntries(
-    Object.entries(topReferers).sort((a, b) => b[1] - a[1])
+    Object.entries(topReferers).sort((a, b) => b[1].views - a[1].views)
   );
   topCountries = Object.fromEntries(
     Object.entries(topCountries).sort((a, b) => b[1] - a[1])
@@ -225,14 +241,25 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     ? ((bouncedSessions / uniqueUsers.size) * 100).toFixed(2)
     : "0.00";
   
-  // convert topReferers to array of {url: 'url', views: 'views'}
-  const topReferersArray = Object.entries(topReferers).map(([url, views]) => ({ url, views }));
+  // Update the topReferersArray creation
+  const topReferersArray = Object.entries(topReferers).map(([url, data]) => ({ 
+    url, 
+    views: data.views, 
+    sessions: data.sessions.size 
+  }));
   //convert topCountries to array of {country: 'country', views: 'views'}
   const topCountriesArray = Object.entries(topCountries).map(([country, views]) => ({ country, views }));
   //convert topEvents to array of {event: 'event', views: 'views'}
   const topEventsArray = Object.entries(topEvents).map(([event, views]) => ({ event, views }));
-  //convert topPages to array of {url: 'url', views: 'views'}
-  const topPagesArray = Object.entries(topPages).map(([url, views]) => ({ url, views }));
+  //convert topPages to array of {url: 'url', views: 'views', sessions: 'sessions'}
+  const topPagesArray = Object.entries(topPages).map(([url, data]) => ({ 
+    url, 
+    views: data.views, 
+    sessions: data.sessions.size 
+  }));
+
+  // Sort topPagesArray by views (descending)
+  topPagesArray.sort((a, b) => b.views - a.views);
 
   const geoLocArray = Array.from(geoLocCounts, ([geoloc, count]) => {
     const [lat, lon] = geoloc.split(',');
@@ -259,7 +286,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     Object.entries(uniqueEventsInPeriod).map(([key, set]) => [key, set.size])
   );
 
-  return {
+  const result = {
     uniqueUsers: uniqueUsers.size,
     totalPageViews,
     uniqueEvents: uniqueEvents.size,
@@ -269,7 +296,7 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     topPages: topPagesArray,
     topReferers: topReferersArray,
     topCountries: topCountriesArray,
-    topEvents: eventConversionRates, // Replace the old topEvents with the new one including conversion rates
+    topEvents: eventConversionRates,
     geoLocCounts: geoLocArray,
     deviceTypes: {
       desktop: desktopSessions,
@@ -277,8 +304,10 @@ export async function calculateAggregatedStats(from, to, domain, inputquery) {
     },
     pageViewsInPeriod,
     uniqueSessionsInPeriod: uniqueSessionCounts,
-    uniqueEventsInPeriod: uniqueEventCounts // Add this new property to the returned object
+    uniqueEventsInPeriod: uniqueEventCounts,
   };
+
+  return result;
 }
 
 // New global function

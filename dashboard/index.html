@@ -327,6 +327,7 @@
                             <tr>
                                 <th class="text-left font-semibold pr-4">Page URL</th>
                                 <th class="text-right font-semibold">Views</th>
+                                <th class="text-right font-semibold">People</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -340,6 +341,9 @@
                                     </td>
                                     <td class="text-sm text-gray-500 text-right">
                                         <span x-text="page.views"></span>
+                                    </td>
+                                    <td class="text-sm text-gray-500 text-right">
+                                        <span x-text="page.sessions"></span>
                                     </td>
                                 </tr>
                             </template>
@@ -357,6 +361,7 @@
                             <tr>
                                 <th class="text-left font-semibold pr-4">Referrer</th>
                                 <th class="text-right font-semibold">Views</th>
+                                <th class="text-right font-semibold">People</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -370,6 +375,9 @@
                                     </td>
                                     <td class="text-sm text-gray-500 text-right">
                                         <span x-text="referer.views"></span>
+                                    </td>
+                                    <td class="text-sm text-gray-500 text-right">
+                                        <span x-text="referer.sessions"></span>
                                     </td>
                                 </tr>
                             </template>

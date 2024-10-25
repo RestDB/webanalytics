@@ -177,11 +177,13 @@ export function dashboard() {
                         
                         if (existingBrand) {
                             existingBrand.views += x.views;
+                            existingBrand.sessions += x.sessions;
                         } else {
                             acc.push({
                                 url: x.url,
                                 brand: brand,
-                                views: x.views
+                                views: x.views,
+                                sessions: x.sessions
                             });
                         }
                         
@@ -194,18 +196,20 @@ export function dashboard() {
                 // Store the selected domain in a local variable
                 const selectedDomain = this.selectedDomain || this.domains[0];
                 // top pages sorted by views
-                this.topPages = statsData.topPages
+                this.topPages = statsData.topPages                
                     .reduce((acc, x) => {
                         const normalizedUrl = normalizeUrl(x.url, selectedDomain);
                         const existingPage = acc.find(page => page.url === normalizedUrl);
                         
                         if (existingPage) {
                             existingPage.views += x.views;
+                            existingPage.sessions += x.sessions;
                         } else {
                             acc.push({
                                 originalUrl: x.url,
                                 url: normalizedUrl,
-                                views: x.views
+                                views: x.views,
+                                sessions: x.sessions
                             });
                         }
                         
@@ -213,6 +217,7 @@ export function dashboard() {
                     }, [])
                     .sort((a, b) => b.views - a.views)
                     .slice(0, 10);
+                
                 this.locations = statsData.locations;
                 //this.signups = statsData.signups;
                 this.bounceRate = statsData.bounceRate;

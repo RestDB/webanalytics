@@ -2,6 +2,7 @@ import { datastore } from 'codehooks-js'
 import UAParser from 'ua-parser-js';
 import { countries } from 'countries-list';
 import { getCountryFromIP, getDateComponents, aggregateAnalyticsData } from './utils.js';
+import { updateAnalytics } from './update_analytics.js';
 const url = require('url');
 
 // New function to extract top domain
@@ -126,6 +127,7 @@ export const trackerWorker = async (workerdata, work) => {
         // store raw data
         await db.insertOne('rawdata', { ...rawData });
         // Queue aggregation tasks
+        // db.enqueue('UPDATEANALYTICS', { trafficData: data });
        /* 
         await db.enqueue('AGGREGATE', { field: 'user_agent', value: `${data.userAgent}`, domain: data.domain });
         await db.enqueue('AGGREGATE', { field: 'device', value: `${data.osName}, ${data.osVersion}, ${data.deviceVendor}, ${data.deviceModel}, ${data.deviceType}`, domain: data.domain });
@@ -176,3 +178,41 @@ export const aggregateWorker = async (workerdata, work) => {
      work.end();
    }
 };
+
+export const updateAnalyticsWorker = async (workerdata, work) => {
+  const {trafficData} = workerdata.body.payload;
+  const db = await datastore.open();    
+  const key = `${trafficData.domain}-${trafficData.year}-${trafficData.month}-${trafficData.day}`;
+  try {        
+    const aggregateData = await db.getOne('aggregate', { key: key });
+    const ID = aggregateData._id;
+    const updatedAnalytics = updateAnalytics(aggregateData, trafficData);
+    delete updatedAnalytics._id;
+    console.log('updatedAnalytics', ID, updatedAnalytics.key);
+    await db.updateOne('aggregate', {_id: ID}, { $set: updatedAnalytics });
+    work.end();
+  } catch (error) {
+    console.error('Error in updateAnalyticsWorker:', error);
+    if (error.message === 'Not found') {
+      let emptyAnalyticsData = {
+        uniqueUsers: {},
+        totalPageViews: 0,
+        uniqueEvents: {},
+        totalPageEvents: 0,
+        averageSessionDuration: 0,
+        topPages: [],
+        topReferers: [],
+        topCountries: {},
+        topEvents: {},
+        geoLocCounts: {},
+        deviceTypes: {},
+        pageViewsInPeriod: {},
+        uniqueSessionsInPeriod: {},
+        uniqueEventsInPeriod: {}
+      };
+      const newAnalytics = updateAnalytics(emptyAnalyticsData, trafficData);
+      await db.insertOne('aggregate', { key: key, ...newAnalytics });
+    }
+    work.end();
+  }
+}
