@@ -5,9 +5,10 @@ import { app, datastore } from 'codehooks-js'
 import analyticsScript from './api/analytics-script.js';
 import { aggregateWorker, trackerWorker, updateAnalyticsWorker } from './api/workers.js';
 import { getAggregatedStats, createStats, getActiveUsers } from './api/api.js';
-import { generatePixel } from './api/utils.js';
+import { generatePixel, extractTopDomain } from './api/utils.js';
 import { initAuth } from 'codehooks-auth'
 import { aiassist } from './api/aiassist.js';
+import { DOMAIN_LIST } from './dashboard/js/config.js';
 /*
 Authentication
 */
@@ -18,13 +19,18 @@ const settings = {
   baseAPIRoutes: '/api', // protected routes
 }
 
+function checkDomain(req) {
+  const domain = extractTopDomain(req.headers['referer']);  
+  const hit = DOMAIN_LIST.includes(domain);
+  console.log('checkDomain', domain, hit);
+  return hit;
+}
 
 /*
 * Public routes
 */
-app.auth('/script.js', (req, res, next) => next())
-app.auth('/pixel.gif', (req, res, next) => next())
-app.auth('/map', (req, res, next) => next())
+app.auth('/script.js', (req, res, next) => checkDomain(req) ? next() : res.status(403).send('Forbidden'));
+app.auth('/pixel.gif', (req, res, next) => checkDomain(req) ? next() : res.status(403).send('Forbidden'));
 
 /* 
 Send a tracker script to client

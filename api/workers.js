@@ -1,23 +1,10 @@
 import { datastore } from 'codehooks-js'
 import UAParser from 'ua-parser-js';
 import { countries } from 'countries-list';
-import { getCountryFromIP, getDateComponents, aggregateAnalyticsData } from './utils.js';
+import { getCountryFromIP, getDateComponents, aggregateAnalyticsData, extractTopDomain } from './utils.js';
 import { updateAnalytics } from './update_analytics.js';
 const url = require('url');
 
-// New function to extract top domain
-function extractTopDomain(urlString) {
-  if (!urlString) return null;
-  try {
-    const parsedUrl = new url.URL(urlString);
-    const hostname = parsedUrl.hostname;
-    const parts = hostname.split('.');
-    return parts.slice(-2).join('.');
-  } catch (error) {
-    console.error('Error extracting top domain:', error);
-    return null;
-  }
-}
 
 export const trackerWorker = async (workerdata, work) => {
     try {

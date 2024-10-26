@@ -1,5 +1,7 @@
 import { datastore } from 'codehooks-js'
 import fetch from 'node-fetch';
+import url from 'url';
+
 /* 
 Get Country from IP 
 */
@@ -102,4 +104,18 @@ export function formatDuration(milliseconds) {
 
 export function generatePixel() {
   return Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+}
+
+// New function to extract top domain
+export function extractTopDomain(urlString) {
+  if (!urlString) return null;
+  try {
+    const parsedUrl = new url.URL(urlString);
+    const hostname = parsedUrl.hostname;
+    const parts = hostname.split('.');
+    return parts.slice(-2).join('.');
+  } catch (error) {
+    console.error('Error extracting top domain:', error);
+    return null;
+  }
 }
