@@ -196,7 +196,7 @@
               break;
           }
           const domainToUse = this.selectedDomain || this.domains[0];
-          const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}`;
+          const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}&period=${this.period}`;
           const statsResponse = await fetchWithJWT(statsEndpoint, {
             headers: {
               "Content-Type": "application/json"
@@ -256,6 +256,9 @@
           this.averageSessionDuration = statsData.averageSessionDuration;
           this.eventCompletions = statsData.totalPageEvents;
           this.pageViewsInPeriod = this.fillMissingHours(statsData.pageViewsInPeriod);
+          if (this.period === "last30days") {
+            this.pageViewsInPeriod = statsData.pageViewsInPeriod;
+          }
           this.pageViewsGraphData = {
             labels: Object.keys(this.pageViewsInPeriod).map((date) => /* @__PURE__ */ new Date(date + "Z")),
             data: Object.values(this.pageViewsInPeriod)
@@ -323,89 +326,119 @@
         }
       },
       initTrafficGraph() {
-        const canvas = document.getElementById("traffic-graph");
-        if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
-          console.error("Traffic graph canvas not found or not a canvas element");
+        if (this._initializingGraph) {
           return;
         }
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          console.error("Unable to get 2D context from canvas");
-          return;
+        this._initializingGraph = true;
+        if (this._graphInitTimeout) {
+          clearTimeout(this._graphInitTimeout);
         }
-        if (this.chartInstance) {
-          this.chartInstance.destroy();
-        }
-        this.chartInstance = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: this.pageViewsGraphData.labels,
-            datasets: [
-              {
-                label: "Page Views",
-                data: this.pageViewsGraphData.data,
-                //borderColor: 'rgb(75, 75, 75)',
-                //backgroundColor: 'rgba(0, 0, 128, 0.2)',
-                borderWidth: 1,
-                // Add this line to make the stroke thinner
-                tension: 0.1,
-                fill: true,
-                pointRadius: 0
-              },
-              {
-                label: "Unique Users",
-                data: this.uniqueSessionsGraphData.data,
-                //borderColor: 'rgb(75, 75, 75)',
-                //backgroundColor: 'rgba(0, 0, 128, 0.2)',
-                borderWidth: 1,
-                // Add this line to make the stroke thinner
-                tension: 0.1,
-                fill: true,
-                pointRadius: 0
-              },
-              {
-                label: "Unique Events",
-                data: this.uniqueEventsGraphData.data,
-                borderWidth: 1,
-                // Add this line to make the stroke thinner
-                tension: 0.1,
-                fill: true,
-                pointRadius: 0
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                type: "time",
-                time: {
-                  unit: this.getTimeUnit(),
-                  displayFormats: {
-                    hour: "HH:mm",
-                    day: "MMM D",
-                    week: "MMM D",
-                    month: "MMM YYYY"
-                  },
-                  tooltipFormat: this.getTooltipFormat(),
-                  // Add a parser to adjust for local timezone
-                  xxparser: (value) => {
-                    const date = /* @__PURE__ */ new Date(value + "Z");
-                    return new Date(date.getTime() - date.getTimezoneOffset() * 6e4);
-                  }
-                },
-                title: {
-                  display: true,
-                  text: this.period
-                }
-              },
-              y: {
-                beginAtZero: true
-              }
+        this._graphInitTimeout = setTimeout(async () => {
+          try {
+            const canvas = document.getElementById("traffic-graph");
+            if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+              console.error("Traffic graph canvas not found or not a canvas element");
+              return;
             }
+            if (this.chartInstance) {
+              await new Promise((resolve) => {
+                try {
+                  this.chartInstance.destroy();
+                } catch (e) {
+                  console.warn("Error destroying previous chart:", e);
+                }
+                this.chartInstance = null;
+                setTimeout(resolve, 100);
+              });
+            }
+            requestAnimationFrame(() => {
+              try {
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                  console.error("Unable to get 2D context from canvas");
+                  return;
+                }
+                this.chartInstance = new Chart(ctx, {
+                  type: "line",
+                  data: {
+                    labels: this.pageViewsGraphData.labels,
+                    datasets: [
+                      {
+                        label: "Page Views",
+                        data: this.pageViewsGraphData.data,
+                        //borderColor: 'rgb(75, 75, 75)',
+                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                        borderWidth: 1,
+                        // Add this line to make the stroke thinner
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 0
+                      },
+                      {
+                        label: "Unique Users",
+                        data: this.uniqueSessionsGraphData.data,
+                        //borderColor: 'rgb(75, 75, 75)',
+                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                        borderWidth: 1,
+                        // Add this line to make the stroke thinner
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 0
+                      },
+                      {
+                        label: "Unique Events",
+                        data: this.uniqueEventsGraphData.data,
+                        borderWidth: 1,
+                        // Add this line to make the stroke thinner
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 0
+                      }
+                    ]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                      x: {
+                        type: "time",
+                        time: {
+                          unit: this.getTimeUnit(),
+                          displayFormats: {
+                            hour: "HH:mm",
+                            day: "MMM D",
+                            week: "MMM D",
+                            month: "MMM YYYY"
+                          },
+                          tooltipFormat: this.getTooltipFormat(),
+                          // Add a parser to adjust for local timezone
+                          xxparser: (value) => {
+                            const date = /* @__PURE__ */ new Date(value + "Z");
+                            return new Date(date.getTime() - date.getTimezoneOffset() * 6e4);
+                          }
+                        },
+                        title: {
+                          display: true,
+                          text: this.period
+                        }
+                      },
+                      y: {
+                        beginAtZero: true
+                      }
+                    }
+                  }
+                });
+              } catch (error) {
+                console.error("Error creating new chart:", error);
+              } finally {
+                this._initializingGraph = false;
+              }
+            });
+          } catch (error) {
+            console.error("Error in initTrafficGraph:", error);
+            this._initializingGraph = false;
           }
-        });
+        }, 300);
       },
       getTimeUnit() {
         switch (this.period) {

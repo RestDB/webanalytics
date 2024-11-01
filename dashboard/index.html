@@ -415,6 +415,13 @@
                                 </td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.mobile"></td>
                             </tr>
+                            <tr></tr>
+                                <td class="py-1 pr-4">
+                                    <a href="#" @click.prevent="setPageFilter('device', 'tablet')"
+                                            class="link link-hover">Tablet</a>
+                                </td>
+                                <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.tablet"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -457,6 +464,7 @@
                     <thead>
                         <tr>
                             <th class="text-left font-semibold pr-4">Event</th>
+                            <th class="text-right font-semibold">Count</th>
                             <th class="text-right font-semibold">People</th>
                             <th class="text-right font-semibold">
                                 <span class="hidden md:inline">Conversion Rate</span>
@@ -473,7 +481,8 @@
                                         <span x-text="event.event"></span>
                                     </a>
                                 </td>
-                                <td class="text-sm text-gray-500 text-right" x-text="event.count"></td>
+                                <td class="text-sm text-gray-500 text-right" x-text="event.views"></td>
+                                <td class="text-sm text-gray-500 text-right" x-text="event.sessions"></td>
                                 <td class="text-sm text-gray-500 text-right" x-text="event.conversionRate"></td>
                             </tr>
                         </template>

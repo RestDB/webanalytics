@@ -136,7 +136,7 @@ export function dashboard() {
                 const domainToUse = this.selectedDomain || this.domains[0];
 
                 // Define the endpoints
-                const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}`;
+                const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}&period=${this.period}`;
                 
                 // Fetch stats data
                 const statsResponse = await fetchWithJWT(statsEndpoint, {
@@ -224,6 +224,9 @@ export function dashboard() {
                 this.averageSessionDuration = statsData.averageSessionDuration;
                 this.eventCompletions = statsData.totalPageEvents;
                 this.pageViewsInPeriod = this.fillMissingHours(statsData.pageViewsInPeriod);
+                if (this.period === 'last30days') {
+                    this.pageViewsInPeriod = statsData.pageViewsInPeriod;
+                }
                 this.pageViewsGraphData = {
                     labels: Object.keys(this.pageViewsInPeriod).map(date => new Date(date + 'Z')),
                     data: Object.values(this.pageViewsInPeriod)
@@ -305,90 +308,125 @@ export function dashboard() {
         },
 
         initTrafficGraph() {
-            const canvas = document.getElementById('traffic-graph');
-            if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
-                console.error('Traffic graph canvas not found or not a canvas element');
+            // Track if initialization is in progress
+            if (this._initializingGraph) {
                 return;
             }
+            this._initializingGraph = true;
 
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                console.error('Unable to get 2D context from canvas');
-                return;
+            // Add debounce/delay to ensure previous chart is fully destroyed
+            if (this._graphInitTimeout) {
+                clearTimeout(this._graphInitTimeout);
             }
 
-            // Destroy the existing chart instance if it exists
-            if (this.chartInstance) {
-                this.chartInstance.destroy();
-            }
-
-            // Create a new chart instance and store it
-            this.chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: this.pageViewsGraphData.labels,
-                    datasets: [{
-                        label: 'Page Views',
-                        data: this.pageViewsGraphData.data,
-                        //borderColor: 'rgb(75, 75, 75)',
-                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
-                        borderWidth: 1, // Add this line to make the stroke thinner
-                        tension: 0.1,
-                        fill: true,
-                        pointRadius: 0
-                    }, 
-                    {
-                        label: 'Unique Users',
-                        data: this.uniqueSessionsGraphData.data,
-                        //borderColor: 'rgb(75, 75, 75)',
-                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
-                        borderWidth: 1, // Add this line to make the stroke thinner
-                        tension: 0.1,
-                        fill: true,
-                        pointRadius: 0
-                    },
-                    {
-                        label: 'Unique Events',
-                        data: this.uniqueEventsGraphData.data,
-                        borderWidth: 1, // Add this line to make the stroke thinner
-                        tension: 0.1,
-                        fill: true,
-                        pointRadius: 0
+            this._graphInitTimeout = setTimeout(async () => {
+                try {
+                    // Wait for canvas to be available
+                    const canvas = document.getElementById('traffic-graph');
+                    if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+                        console.error('Traffic graph canvas not found or not a canvas element');
+                        return;
                     }
-                ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: this.getTimeUnit(),
-                                displayFormats: {
-                                    hour: 'HH:mm',
-                                    day: 'MMM D',
-                                    week: 'MMM D',
-                                    month: 'MMM YYYY'
-                                },
-                                tooltipFormat: this.getTooltipFormat(),
-                                // Add a parser to adjust for local timezone
-                                xxparser: (value) => {
-                                    const date = new Date(value + 'Z');
-                                    return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: this.period
+
+                    // Safely destroy the existing chart instance
+                    if (this.chartInstance) {
+                        await new Promise(resolve => {
+                            try {
+                                this.chartInstance.destroy();
+                            } catch (e) {
+                                console.warn('Error destroying previous chart:', e);
                             }
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
+                            this.chartInstance = null;
+                            setTimeout(resolve, 100); // Small delay to ensure cleanup
+                        });
                     }
+
+                    // Create new chart in next animation frame
+                    requestAnimationFrame(() => {
+                        try {
+                            const ctx = canvas.getContext('2d');
+                            if (!ctx) {
+                                console.error('Unable to get 2D context from canvas');
+                                return;
+                            }
+
+                            this.chartInstance = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: this.pageViewsGraphData.labels,
+                                    datasets: [{
+                                        label: 'Page Views',
+                                        data: this.pageViewsGraphData.data,
+                                        //borderColor: 'rgb(75, 75, 75)',
+                                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                                        borderWidth: 1, // Add this line to make the stroke thinner
+                                        tension: 0.1,
+                                        fill: true,
+                                        pointRadius: 0
+                                    }, 
+                                    {
+                                        label: 'Unique Users',
+                                        data: this.uniqueSessionsGraphData.data,
+                                        //borderColor: 'rgb(75, 75, 75)',
+                                        //backgroundColor: 'rgba(0, 0, 128, 0.2)',
+                                        borderWidth: 1, // Add this line to make the stroke thinner
+                                        tension: 0.1,
+                                        fill: true,
+                                        pointRadius: 0
+                                    },
+                                    {
+                                        label: 'Unique Events',
+                                        data: this.uniqueEventsGraphData.data,
+                                        borderWidth: 1, // Add this line to make the stroke thinner
+                                        tension: 0.1,
+                                        fill: true,
+                                        pointRadius: 0
+                                    }
+                                ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            type: 'time',
+                                            time: {
+                                                unit: this.getTimeUnit(),
+                                                displayFormats: {
+                                                    hour: 'HH:mm',
+                                                    day: 'MMM D',
+                                                    week: 'MMM D',
+                                                    month: 'MMM YYYY'
+                                                },
+                                                tooltipFormat: this.getTooltipFormat(),
+                                                // Add a parser to adjust for local timezone
+                                                xxparser: (value) => {
+                                                    const date = new Date(value + 'Z');
+                                                    return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                                                }
+                                            },
+                                            title: {
+                                                display: true,
+                                                text: this.period
+                                            }
+                                        },
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Error creating new chart:', error);
+                        } finally {
+                            this._initializingGraph = false;
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error in initTrafficGraph:', error);
+                    this._initializingGraph = false;
                 }
-            });
+            }, 300); // Add a delay to ensure DOM is ready
         },
 
         getTimeUnit() {
