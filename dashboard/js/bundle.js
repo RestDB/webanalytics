@@ -256,9 +256,6 @@
           this.averageSessionDuration = statsData.averageSessionDuration;
           this.eventCompletions = statsData.totalPageEvents;
           this.pageViewsInPeriod = this.fillMissingHours(statsData.pageViewsInPeriod);
-          if (this.period === "last30days") {
-            this.pageViewsInPeriod = statsData.pageViewsInPeriod;
-          }
           this.pageViewsGraphData = {
             labels: Object.keys(this.pageViewsInPeriod).map((date) => /* @__PURE__ */ new Date(date + "Z")),
             data: Object.values(this.pageViewsInPeriod)

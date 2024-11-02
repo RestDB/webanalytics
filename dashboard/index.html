@@ -20,10 +20,11 @@
 
     <style>
         .leaflet-container {
-            height: 400px;
+            height: 300px;
             width: 100%;
             max-width: 100%;
             max-height: 100%;
+            z-index: 1;
         }
 
         .traffic-graph {
@@ -225,86 +226,34 @@
             </div>
         </div>
 
-        <!-- AI Assist -->
-        <div class="card bg-base-100 shadow-xl mb-4">
-            <div class="card-body">
-                <h2 class="card-title flex items-center">
-                    <!-- AI Light Bulb Icon -->
-                     
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                      </svg>
-                      
-
-                    AI Advisor 
-                    <div class="ml-2 text-xs" x-text="`Updated:${new Date(aiassist.lastUpdated).toLocaleTimeString()}`"></div>
-                </h2>                
-                <div class="prose">
-                    <!-- Ingress (always visible) -->
-                    <div class="mb-4">
-                        <p x-text="`${aiassist.ingress ? 'TLDR:&nbsp;'+aiassist.ingress : 'No AI insights available at this time.'}`"></p>
-                        <a href="#" @click.prevent="showFullReport = !showFullReport" class="text-blue-600 hover:underline" x-show="hasAdditionalContent()">
-                            <span x-text="showFullReport ? 'Hide full report' : 'Read more'"></span>
-                        </a>
+        <!-- AI Assist and World Map Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- World Map -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title">User Distribution</h2>
+                    <div id="world_map">
+                        <!-- World map will be inserted here -->
                     </div>
+                </div>
+            </div>
 
-                    <!-- Full Report (hidden by default) -->
-                    <div x-show="showFullReport">
-                        <!-- Summary (if different from ingress) -->
-                        <template x-if="aiassist.summary && aiassist.summary !== aiassist.ingress">
-                            <div class="mb-4">
-                                <h3 class="text-lg font-semibold">Summary</h3>
-                                <p x-text="aiassist.summary"></p>
-                            </div>
-                        </template>
-
-                        <!-- Recommendations -->
-                        <template x-if="aiassist.recommendations && aiassist.recommendations.length > 0">
-                            <div class="mb-4">
-                                <h3 class="text-lg font-semibold">Recommendations</h3>
-                                <ul>
-                                    <template x-for="recommendation in aiassist.recommendations" :key="recommendation">
-                                        <li x-text="recommendation"></li>
-                                    </template>
-                                </ul>
-                            </div>
-                        </template>
-
-                        <!-- Key Insights -->
-                        <template x-if="aiassist['key insights'] && aiassist['key insights'].length > 0">
-                            <div class="mb-4">
-                                <h3 class="text-lg font-semibold">Key Insights</h3>
-                                <ul>
-                                    <template x-for="insight in aiassist['key insights']" :key="insight">
-                                        <li x-text="insight"></li>
-                                    </template>
-                                </ul>
-                            </div>
-                        </template>
-
-                        <!-- Data-driven Recommendations -->
-                        <template x-if="aiassist['data-driven recommendations'] && aiassist['data-driven recommendations'].length > 0">
-                            <div class="mb-4">
-                                <h3 class="text-lg font-semibold">Data-driven Recommendations</h3>
-                                <ul>
-                                    <template x-for="recommendation in aiassist['data-driven recommendations']" :key="recommendation">
-                                        <li x-text="recommendation"></li>
-                                    </template>
-                                </ul>
-                            </div>
-                        </template>
-
-                        <!-- Unusual Patterns or Anomalies or Fun Facts -->
-                        <template x-if="aiassist['unusual patterns or anomalies or fun facts'] && aiassist['unusual patterns or anomalies or fun facts'].length > 0">
-                            <div class="mb-4">
-                                <h3 class="text-lg font-semibold">Unusual Patterns, Anomalies, or Fun Facts</h3>
-                                <ul>
-                                    <template x-for="item in aiassist['unusual patterns or anomalies or fun facts']" :key="item">
-                                        <li x-text="item"></li>
-                                    </template>
-                                </ul>
-                            </div>
-                        </template>
+            <!-- AI Advisor -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title flex items-center">
+                        <!-- AI Light Bulb Icon -->                     
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                        </svg>                      
+                        AI Advisor 
+                        <div class="ml-2 text-xs" x-text="`Updated:${new Date(aiassist.lastUpdated).toLocaleTimeString()}`"></div>
+                    </h2>                
+                    <div class="prose">
+                        <!-- Ingress (always visible) -->
+                        <div class="mb-4">
+                            <p x-text="`${aiassist.ingress || 'No AI insights available at this time.'}`"></p>                            
+                        </div>
                     </div>
                 </div>
             </div>
@@ -488,16 +437,6 @@
                         </template>
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- World Map -->
-        <div class="card bg-base-100 shadow-xl mb-4">
-            <div class="card-body h-[500px]">
-                <h2 class="card-title">User Distribution</h2>
-                <div id="world_map" class="w-full h-full">
-                    <!-- World map will be inserted here -->
-                </div>
             </div>
         </div>
     </div>    

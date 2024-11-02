@@ -40,7 +40,7 @@ Here's the web analytics data: ${JSON.stringify(data)}.
 
 Please provide the output in pure JSON format (no other text or markup) like this: 
 {
-    "ingress": "TLDR; 1-2 sentences",
+    "ingress": "Create a concise and clear ingress of ca. 100 words",
     "recommendations": [
         "Recommendation 1",
         "Recommendation 2",
