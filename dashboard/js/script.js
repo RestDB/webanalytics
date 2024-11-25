@@ -59,7 +59,7 @@ export function dashboard() {
                 const now = new Date();
                 //now.setHours(24, 0, 0, 0);
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                today.setHours(24, 0, 0, 0);
+                //today.setHours(24, 0, 0, 0);
                 const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
                 
                 const nowStr = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1)).toISOString()

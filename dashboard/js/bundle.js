@@ -139,7 +139,6 @@
         try {
           const now = /* @__PURE__ */ new Date();
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          today.setHours(24, 0, 0, 0);
           const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
           const nowStr = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
           const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
