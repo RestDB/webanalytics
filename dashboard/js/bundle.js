@@ -85,6 +85,56 @@
 
   // dashboard/js/script.js
   var realtimeUsersInterval = null;
+  function getTimeRange(rangeString) {
+    const now = /* @__PURE__ */ new Date();
+    const timezoneOffsetMinutes = now.getTimezoneOffset();
+    const utcNow = new Date(now.getTime() + timezoneOffsetMinutes * 6e4);
+    let start;
+    switch (rangeString) {
+      case "day": {
+        start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate());
+        break;
+      }
+      case "yesterday": {
+        start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 1);
+        utcNow.setTime(new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate()).getTime() - 1);
+        break;
+      }
+      case "last2days": {
+        start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 2);
+        break;
+      }
+      case "last7days": {
+        start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 7);
+        break;
+      }
+      case "last30days": {
+        start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 30);
+        break;
+      }
+      case "last3months": {
+        start = new Date(utcNow.getFullYear(), utcNow.getMonth() - 3, utcNow.getDate());
+        break;
+      }
+      case "lastmonth": {
+        const firstDayOfLastMonth = new Date(utcNow.getFullYear(), utcNow.getMonth() - 1, 1);
+        const firstDayOfThisMonth = new Date(utcNow.getFullYear(), utcNow.getMonth(), 1);
+        start = firstDayOfLastMonth;
+        utcNow.setTime(firstDayOfThisMonth.getTime() - 1);
+        break;
+      }
+      case "lastyear": {
+        start = new Date(utcNow.getFullYear(), 0, 1);
+        break;
+      }
+      default:
+        throw new Error(`Unsupported range string: "${rangeString}"`);
+    }
+    return {
+      start: start.toISOString(),
+      end: utcNow.toISOString()
+    };
+  }
   function dashboard() {
     return {
       title: DASHBOARD_TITLE,
@@ -137,63 +187,9 @@
       // Add methods to update data based on period changes
       async fetchStats() {
         try {
-          const now = /* @__PURE__ */ new Date();
-          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
-          const nowStr = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
-          const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
-          const yesterdayStr = yesterday.toISOString();
-          const yesterdayEndStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
-          const twoDaysAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 2));
-          const twoDaysAgoStr = twoDaysAgo.toISOString();
-          const twoDaysAgoEndStr = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate()) - 1).toISOString();
-          const last2Days = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate() - 1));
-          const last2DaysStr = last2Days.toISOString();
-          const last2DaysEndStr = yesterdayStr;
-          const last7Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
-          const last7DaysStr = last7Days.toISOString();
-          const last30Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 30));
-          const last30DaysStr = last30Days.toISOString();
-          const last3Months = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 3, today.getUTCDate()));
-          const last3MonthsStr = last3Months.toISOString();
-          const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
-          const oneYearAgoStr = oneYearAgo.toISOString();
-          let fromPeriodStr = "";
-          let toPeriodStr = "";
-          switch (this.period) {
-            case "day":
-              fromPeriodStr = todayStr;
-              toPeriodStr = nowStr;
-              break;
-            case "yesterday":
-              fromPeriodStr = yesterdayStr;
-              toPeriodStr = yesterdayEndStr;
-              break;
-            case "last2days":
-              fromPeriodStr = last2DaysEndStr;
-              toPeriodStr = nowStr;
-              break;
-            case "last7days":
-              fromPeriodStr = last7DaysStr;
-              toPeriodStr = nowStr;
-              break;
-            case "last30days":
-              fromPeriodStr = last30DaysStr;
-              toPeriodStr = nowStr;
-              break;
-            case "last3months":
-              fromPeriodStr = last3MonthsStr;
-              toPeriodStr = nowStr;
-              break;
-            case "lastmonth":
-              fromPeriodStr = last3MonthsStr;
-              toPeriodStr = nowStr;
-              break;
-            case "lastyear":
-              fromPeriodStr = oneYearAgoStr;
-              toPeriodStr = nowStr;
-              break;
-          }
+          const timeRange = getTimeRange(this.period);
+          const fromPeriodStr = timeRange.start;
+          const toPeriodStr = timeRange.end;
           const domainToUse = this.selectedDomain || this.domains[0];
           const statsEndpoint = `/api/aggstats/${fromPeriodStr}/${toPeriodStr}?domain=${domainToUse}&query=${JSON.stringify(this.query)}&period=${this.period}`;
           const statsResponse = await fetchWithJWT(statsEndpoint, {

@@ -4,6 +4,59 @@ import { DOMAIN_LIST, DASHBOARD_TITLE, REALTIME_USERS_INTERVAL } from './config.
 
 let realtimeUsersInterval = null; // interval handle for fetching realtime users
 
+function getTimeRange(rangeString) {
+    const now = new Date(); // Current local time
+    const timezoneOffsetMinutes = now.getTimezoneOffset(); // Local timezone offset in minutes
+    const utcNow = new Date(now.getTime() + timezoneOffsetMinutes * 60000); // Current time in UTC
+
+    let start;
+    switch (rangeString) {
+        case 'day': {
+            start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate()); // Start of today in UTC
+            break;
+        }
+        case 'yesterday': {
+            start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 1);
+            utcNow.setTime(new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate()).getTime() - 1);
+            break;
+        }
+        case 'last2days': {
+            start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 2);
+            break;
+        }
+        case 'last7days': {
+            start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 7);
+            break;
+        }
+        case 'last30days': {
+            start = new Date(utcNow.getFullYear(), utcNow.getMonth(), utcNow.getDate() - 30);
+            break;
+        }
+        case 'last3months': {
+            start = new Date(utcNow.getFullYear(), utcNow.getMonth() - 3, utcNow.getDate());
+            break;
+        }
+        case 'lastmonth': {
+            const firstDayOfLastMonth = new Date(utcNow.getFullYear(), utcNow.getMonth() - 1, 1);
+            const firstDayOfThisMonth = new Date(utcNow.getFullYear(), utcNow.getMonth(), 1);
+            start = firstDayOfLastMonth;
+            utcNow.setTime(firstDayOfThisMonth.getTime() - 1); // End is the last moment of the last month
+            break;
+        }
+        case 'lastyear': {
+            start = new Date(utcNow.getFullYear(), 0, 1);
+            break;
+        }
+        default:
+            throw new Error(`Unsupported range string: "${rangeString}"`);
+    }
+
+    return {
+        start: start.toISOString(),
+        end: utcNow.toISOString(),
+    };
+}
+
 export function dashboard() {
     return {
         title: DASHBOARD_TITLE,
@@ -56,82 +109,11 @@ export function dashboard() {
 
         async fetchStats() {
             try {
-                const now = new Date();
-                //now.setHours(24, 0, 0, 0);
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                //today.setHours(24, 0, 0, 0);
-                const todayStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
-                
-                const nowStr = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1)).toISOString()
+                // Get time range using the existing function
+                const timeRange = getTimeRange(this.period);
+                const fromPeriodStr = timeRange.start;
+                const toPeriodStr = timeRange.end;
 
-                // Yesterday: [yesterday start of day, yesterday end of day] in UTC
-                const yesterday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
-                const yesterdayStr = yesterday.toISOString();
-                const yesterdayEndStr = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())).toISOString();
-
-                // Two days ago: [two days ago start of day, two days ago end of day] in UTC
-                const twoDaysAgo = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 2));
-                const twoDaysAgoStr = twoDaysAgo.toISOString();
-                const twoDaysAgoEndStr = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate()) - 1).toISOString();
-
-                // Last 2 days: [two days ago start of day, yesterday end of day] in UTC
-                const last2Days = new Date(Date.UTC(yesterday.getUTCFullYear(), yesterday.getUTCMonth(), yesterday.getUTCDate() - 1));
-                const last2DaysStr = last2Days.toISOString();
-                const last2DaysEndStr = yesterdayStr;
-
-                // Last 7 days: [7 days ago, current time] in UTC
-                const last7Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
-                const last7DaysStr = last7Days.toISOString();
-
-                // Last 30 days: [30 days ago, current time] in UTC
-                const last30Days = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 30));
-                const last30DaysStr = last30Days.toISOString();
-
-                // Last 3 months: [3 months ago, current time] in UTC
-                const last3Months = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 3, today.getUTCDate()));
-                const last3MonthsStr = last3Months.toISOString();
-
-                // One year ago: [start of previous year, current time] in UTC
-                const oneYearAgo = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
-                const oneYearAgoStr = oneYearAgo.toISOString();
-
-                let fromPeriodStr = '';
-                let toPeriodStr = '';
-
-                switch (this.period) {
-                    case 'day':
-                        fromPeriodStr = todayStr;
-                        toPeriodStr = nowStr;
-                        break;
-                    case 'yesterday':
-                        fromPeriodStr = yesterdayStr;
-                        toPeriodStr = yesterdayEndStr;
-                        break;
-                    case 'last2days':
-                        fromPeriodStr = last2DaysEndStr;
-                        toPeriodStr = nowStr;
-                        break;
-                    case 'last7days':
-                        fromPeriodStr = last7DaysStr;
-                        toPeriodStr = nowStr;
-                        break;
-                    case 'last30days':
-                        fromPeriodStr = last30DaysStr;
-                        toPeriodStr = nowStr;
-                        break;
-                    case 'last3months':
-                        fromPeriodStr = last3MonthsStr;
-                        toPeriodStr = nowStr;
-                        break;
-                    case 'lastmonth':
-                        fromPeriodStr = last3MonthsStr;
-                        toPeriodStr = nowStr;
-                        break;
-                    case 'lastyear':
-                        fromPeriodStr = oneYearAgoStr;
-                        toPeriodStr = nowStr;
-                        break;
-                }
                 // If selectedDomain is null, use the first domain from the domains array
                 const domainToUse = this.selectedDomain || this.domains[0];
 
