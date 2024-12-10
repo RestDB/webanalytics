@@ -9,13 +9,15 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.3/dist/full.css" rel="stylesheet" type="text/css" />
     <link href="css/output.css" rel="stylesheet" type="text/css" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="js/heatmap.min.js"></script>
     <script src="js/leaflet-heatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
     <script src="js/bundle.js"></script>
 
     <style>
@@ -49,7 +51,8 @@
                     x-show="open">
                     <template x-for="domain in domains" :key="domain">
                         <li>
-                            <a :class="{ 'active': selectedDomain === domain }" x-text="domain" @click="setSelectedDomain(domain); open = false"></a>
+                            <a :class="{ 'active': selectedDomain === domain }" x-text="domain"
+                                @click="setSelectedDomain(domain); open = false"></a>
                         </li>
                     </template>
                 </ul>
@@ -66,7 +69,7 @@
         <div class="navbar-end">
             <!-- Period Selector -->
             <div class="dropdown dropdown-end" x-data="{ open: false }">
-                <label tabindex="0" class="btn btn-ghost lg:hidden" @click="open = !open">                        
+                <label tabindex="0" class="btn btn-ghost lg:hidden" @click="open = !open">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -75,37 +78,46 @@
                 <ul tabindex="0"
                     class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
                     x-show="open" @click.away="open = false">
-                    <li><a :class="{ 'active': period === 'day' }" @click="period = 'day'; updateStats(); open = false">Today</a></li>
-                    <li><a :class="{ 'active': period === 'yesterday' }" @click="period = 'yesterday'; updateStats(); open = false">Yesterday</a></li>
-                    <li><a :class="{ 'active': period === 'last2days' }" @click="period = 'last2days'; updateStats(); open = false">2D</a></li>
-                    <li><a :class="{ 'active': period === 'last7days' }" @click="period = 'last7days'; updateStats(); open = false">7D</a></li>
-                    <li><a :class="{ 'active': period === 'last30days' }" @click="period = 'last30days'; updateStats(); open = false">30D</a></li>
-                    <li><a :class="{ 'active': period === 'last3months' }" @click="period = 'last3months'; updateStats(); open = false">3M</a></li>
-                    <li><a :class="{ 'active': period === 'lastyear' }" @click="period = 'lastyear'; updateStats(); open = false">1Y</a></li>
+                    <li><a :class="{ 'active': period === 'day' }"
+                            @click="period = 'day'; updateStats(); open = false">Today</a></li>
+                    <li><a :class="{ 'active': period === 'yesterday' }"
+                            @click="period = 'yesterday'; updateStats(); open = false">Yesterday</a></li>
+                    <li><a :class="{ 'active': period === 'last2days' }"
+                            @click="period = 'last2days'; updateStats(); open = false">2D</a></li>
+                    <li><a :class="{ 'active': period === 'last7days' }"
+                            @click="period = 'last7days'; updateStats(); open = false">7D</a></li>
+                    <li><a :class="{ 'active': period === 'last30days' }"
+                            @click="period = 'last30days'; updateStats(); open = false">30D</a></li>
+                    <li><a :class="{ 'active': period === 'last3months' }"
+                            @click="period = 'last3months'; updateStats(); open = false">3M</a></li>
+                    <li><a :class="{ 'active': period === 'lastyear' }"
+                            @click="period = 'lastyear'; updateStats(); open = false">1Y</a></li>
                 </ul>
             </div>
             <ul class="menu menu-horizontal px-1 hidden lg:flex">
                 <li><a :class="{ 'active': period === 'day' }" @click="period = 'day'; updateStats()">Today</a></li>
-                <li><a :class="{ 'active': period === 'yesterday' }" @click="period = 'yesterday'; updateStats()">Yesterday</a></li>
-                <li><a :class="{ 'active': period === 'last2days' }"
-                        @click="period = 'last2days'; updateStats()">2D</a></li>
-                <li><a :class="{ 'active': period === 'last7days' }"
-                        @click="period = 'last7days'; updateStats()">7D</a></li>
+                <li><a :class="{ 'active': period === 'yesterday' }"
+                        @click="period = 'yesterday'; updateStats()">Yesterday</a></li>
+                <li><a :class="{ 'active': period === 'last2days' }" @click="period = 'last2days'; updateStats()">2D</a>
+                </li>
+                <li><a :class="{ 'active': period === 'last7days' }" @click="period = 'last7days'; updateStats()">7D</a>
+                </li>
                 <li><a :class="{ 'active': period === 'last30days' }"
                         @click="period = 'last30days'; updateStats()">30D</a></li>
                 <li><a :class="{ 'active': period === 'last3months' }"
                         @click="period = 'last3months'; updateStats()">3M</a></li>
-                <li><a :class="{ 'active': period === 'lastyear' }"
-                        @click="period = 'lastyear'; updateStats()">1Y</a></li>
+                <li><a :class="{ 'active': period === 'lastyear' }" @click="period = 'lastyear'; updateStats()">1Y</a>
+                </li>
             </ul>
-            
-            <input type="checkbox" class="toggle" x-model="theme" @change="theme = $event.target.checked ? 'dark' : 'light'" />
-                        
+
+            <input type="checkbox" class="toggle" x-model="theme"
+                @change="theme = $event.target.checked ? 'dark' : 'light'" />
+
         </div>
     </div>
-    
+
     <div class="container mx-auto p-4">
-        
+
 
         <!-- Add a spacer to prevent content from being hidden behind the fixed navbar -->
         <div class="h-16"></div>
@@ -123,23 +135,23 @@
                 </div>
             </div>
         </div>
-        
-        
+
+
         <!-- Stats for Larger Screens -->
         <div class="hidden md:flex stats shadow mb-4 bg-neutral text-neutral-content">
             <div class="stat">
                 <div class="stat-title text-info">Realtime</div>
                 <div class="stat-value">
                     <span x-show="!loading" x-text="realtimeUsers"></span>
-                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>                    
-                </div>                
+                    <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                </div>
             </div>
             <div class="stat">
                 <div class="stat-title text-info">People</div>
                 <div class="stat-value">
                     <span x-show="!loading" x-text="uniqueUsers"></span>
                     <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                </div>                
+                </div>
             </div>
 
             <div class="stat">
@@ -211,7 +223,8 @@
                         <td class="text-base">Time on Site</td>
                         <td class="text-base text-right">
                             <span x-show="!loading"
-                                x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`" class="text-info"></span>
+                                x-text="`${averageSessionDuration.minutes}:${averageSessionDuration.seconds}`"
+                                class="text-info"></span>
                             <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                         </td>
                     </tr>
@@ -237,26 +250,41 @@
                     </div>
                 </div>
             </div>
-
-            <!-- AI Advisor -->
+            <!-- Top Custom Events -->
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h2 class="card-title flex items-center">
-                        <!-- AI Light Bulb Icon -->                     
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                        </svg>                      
-                        AI Advisor 
-                        <div class="ml-2 text-xs" x-text="`Updated:${new Date(aiassist.lastUpdated).toLocaleTimeString()}`"></div>
-                    </h2>                
-                    <div class="prose">
-                        <!-- Ingress (always visible) -->
-                        <div class="mb-4">
-                            <p x-text="`${aiassist.ingress || 'No AI insights available at this time.'}`"></p>                            
-                        </div>
-                    </div>
+                    <h2 class="card-title">Top Custom Events</h2>
+                    <table class="table-auto w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left font-semibold pr-4">Event</th>
+                                <th class="text-right font-semibold">Count</th>
+                                <th class="text-right font-semibold">People</th>
+                                <th class="text-right font-semibold">
+                                    <span class="hidden md:inline">Conversion Rate</span>
+                                    <span class="md:hidden">CR</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="event in topEvents" :key="event.event">
+                                <tr>
+                                    <td class="py-1 pr-4">
+                                        <a href="#" @click.prevent="setPageFilter('event', event.event)"
+                                            class="link link-hover">
+                                            <span x-text="event.event"></span>
+                                        </a>
+                                    </td>
+                                    <td class="text-sm text-gray-500 text-right" x-text="event.views"></td>
+                                    <td class="text-sm text-gray-500 text-right" x-text="event.sessions"></td>
+                                    <td class="text-sm text-gray-500 text-right" x-text="event.conversionRate"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
         </div>
 
         <!-- Traffic graph -->
@@ -353,23 +381,23 @@
                             <tr>
                                 <td class="py-1 pr-4">
                                     <a href="#" @click.prevent="setPageFilter('device', 'desktop')"
-                                            class="link link-hover">Desktop</a>
+                                        class="link link-hover">Desktop</a>
                                 </td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.desktop"></td>
                             </tr>
                             <tr>
                                 <td class="py-1 pr-4">
                                     <a href="#" @click.prevent="setPageFilter('device', 'mobile')"
-                                            class="link link-hover">Mobile</a>
+                                        class="link link-hover">Mobile</a>
                                 </td>
                                 <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.mobile"></td>
                             </tr>
                             <tr></tr>
-                                <td class="py-1 pr-4">
-                                    <a href="#" @click.prevent="setPageFilter('device', 'tablet')"
-                                            class="link link-hover">Tablet</a>
-                                </td>
-                                <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.tablet"></td>
+                            <td class="py-1 pr-4">
+                                <a href="#" @click.prevent="setPageFilter('device', 'tablet')"
+                                    class="link link-hover">Tablet</a>
+                            </td>
+                            <td class="text-sm text-gray-500 text-right" x-text="deviceTypes.tablet"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -404,42 +432,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Top Custom Events -->
-        <div class="card bg-base-100 shadow-xl mb-4">
-            <div class="card-body">
-                <h2 class="card-title">Top Custom Events</h2>
-                <table class="table-auto w-full">
-                    <thead>
-                        <tr>
-                            <th class="text-left font-semibold pr-4">Event</th>
-                            <th class="text-right font-semibold">Count</th>
-                            <th class="text-right font-semibold">People</th>
-                            <th class="text-right font-semibold">
-                                <span class="hidden md:inline">Conversion Rate</span>
-                                <span class="md:hidden">CR</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="event in topEvents" :key="event.event">
-                            <tr>
-                                <td class="py-1 pr-4">
-                                    <a href="#" @click.prevent="setPageFilter('event', event.event)"
-                                            class="link link-hover">
-                                        <span x-text="event.event"></span>
-                                    </a>
-                                </td>
-                                <td class="text-sm text-gray-500 text-right" x-text="event.views"></td>
-                                <td class="text-sm text-gray-500 text-right" x-text="event.sessions"></td>
-                                <td class="text-sm text-gray-500 text-right" x-text="event.conversionRate"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>    
+    </div>
 </body>
 
 </html>

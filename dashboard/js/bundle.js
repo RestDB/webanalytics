@@ -201,7 +201,6 @@
             throw new Error("Failed to fetch stats data");
           }
           const statsData = await statsResponse.json();
-          this.fetchAIAssistData(`/api/aiassist?domain=${domainToUse}`);
           if (realtimeUsersInterval) {
             clearInterval(realtimeUsersInterval);
           }

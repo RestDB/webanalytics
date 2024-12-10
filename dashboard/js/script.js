@@ -134,7 +134,7 @@ export function dashboard() {
                 const statsData = await statsResponse.json();
 
                 // Fetch AI assist data asynchronously
-                this.fetchAIAssistData(`/api/aiassist?domain=${domainToUse}`);
+                //this.fetchAIAssistData(`/api/aiassist?domain=${domainToUse}`);
 
                 // Fetch realtime users asynchronously
                 if (realtimeUsersInterval) {
