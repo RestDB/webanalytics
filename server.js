@@ -13,14 +13,36 @@ import { DOMAIN_LIST } from './dashboard/js/config.js';
 Authentication
 */
 const settings = {
-  JWT_ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_TOKEN_SECRET, // coho set-env JWT_ACCESS_TOKEN_SECRET 'xxx' --encrypted
-  JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_TOKEN_SECRET, // coho set-env JWT_REFRESH_TOKEN_SECRET 'xxx' --encrypted
+  JWT_ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_TOKEN_SECRET, 
+  JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_TOKEN_SECRET,
   redirectSuccessUrl: '/dashboard/index.html', // where to redirect after successful login
   baseAPIRoutes: '/api', // protected routes
+  emailProvider: 'mailgun',
+  emailSettings: {
+    mailgun: {
+      MAILGUN_APIKEY: process.env.MAILGUN_APIKEY,
+      MAILGUN_DOMAIN: 'mg.restdb.io',
+      MAILGUN_FROM_EMAIL: 'jones@restdb.io',
+      MAILGUN_FROM_NAME: 'Theo & Annie'
+    }
+  },
+  onLoginUser: async (req, res, data) => {
+    const { user } = data;
+    const allowedEmails = ['jones@codehooks.io', 'knutmt@codehooks.io']; // Add your allowed emails here
+
+    console.log('onLoginUser', user.email);
+    return new Promise((resolve, reject) => {
+      if (!allowedEmails.includes(user.email)) {
+        console.error('User not allowed to login');
+        reject('User not allowed to login');
+      }
+      resolve();
+    });
+  }
 }
 
 function checkDomain(req) {
-  const domain = extractTopDomain(req.headers['referer']);  
+  const domain = extractTopDomain(req.headers['referer']);
   const hit = DOMAIN_LIST.includes(domain);
   console.log('checkDomain', domain, hit);
   return hit;
@@ -85,8 +107,8 @@ app.get('/', (req, res) => {
 
 // setup auth settings
 initAuth(app, settings)
-app.static({route: '/auth', directory: '/auth/assets', default: 'login.html'})
-app.static({route: '/dashboard', directory: '/dashboard', default: 'index.html'})
+//app.static({route: '/auth', directory: '/auth/assets', default: 'login.html'})
+app.static({ route: '/dashboard', directory: '/dashboard', default: 'index.html' })
 
 /*
   Data API
@@ -98,9 +120,9 @@ app.get('/api/activeusers', getActiveUsers);
 /* 
   Bind application to serverless runtime
 */
-export default app.init(async() => {
+export default app.init(async () => {
   // create indexes
-  const conn = await datastore.open();    
+  const conn = await datastore.open();
   await conn.createIndex('traffic', ['timestamp', 'domain']);
 });
 

@@ -38,7 +38,7 @@ The heatmap shows you where your users are clicking on a world map. The map is p
 
 ![Screenshot 2](/screenshots/heatmap.png)
 
-Secure user/password authentication by username and password. The authentication is powered by the open source  package [codehooks-auth](https://www.npmjs.com/package/codehooks-auth).
+Secure authentication powered by the open source [codehooks-auth](https://www.npmjs.com/package/codehooks-auth) package.
 
 ![Screenshot 3](/screenshots/signin.png)
 
@@ -83,11 +83,39 @@ Install the dependencies and set up the project using the following steps:
 ### Configuration and environment variables
 
 1. Set up JWT secrets for authentication:
+   The authentication is powered by [codehooks-auth](https://www.npmjs.com/package/codehooks-auth), which provides:
+   - JWT-based authentication with access and refresh tokens
+   - Built-in user management
+   - Email verification (optional)
+   - CORS support
+   
+   Set up the required JWT secrets:
    ```
    coho set-env JWT_ACCESS_TOKEN_SECRET 'your_access_token_secret' --encrypted
    coho set-env JWT_REFRESH_TOKEN_SECRET 'your_refresh_token_secret' --encrypted
    ```
-   Tip: Use [`uuidgen`](https://man7.org/linux/man-pages/man1/uuidgen.1.html) to generate random secrets.
+   
+   Tips:
+   - Use openssl to generate random secrets: `openssl rand -base64 32`
+   - Access tokens are short-lived (default: 15 minutes)
+   - Refresh tokens are long-lived (default: 7 days)
+   - Token expiration times can be configured in the auth settings
+
+   Optional email configuration for password reset and verification:
+   ```javascript
+   const settings = {
+     // ... other settings ...
+     emailProvider: 'mailgun', // or 'postmark'
+     emailSettings: {
+       mailgun: {
+         MAILGUN_APIKEY: process.env.MAILGUN_APIKEY,
+         MAILGUN_DOMAIN: 'your-domain.com',
+         MAILGUN_FROM_EMAIL: 'noreply@your-domain.com',
+         MAILGUN_FROM_NAME: 'Your App Name'
+       }
+     }
+   }
+   ```
 
 2. Create a new API key:
    ```
@@ -106,7 +134,7 @@ Install the dependencies and set up the project using the following steps:
    ```
    coho set-env IPINFO_TOKEN 'your_token_here' --encrypted
    ```
-5. Configure the OpenAI API key `OPENAI_API_KEY` environment variable:
+5. **Optional**: Configure the OpenAI API key `OPENAI_API_KEY` environment variable:
    Get your API key from [OpenAI](https://platform.openai.com/api-keys).
 
    ```
@@ -141,14 +169,11 @@ curl --location 'https://your-coho-app-url.codehooks.io/auth/createuser' \
 --header 'x-apikey: YOUR_API_KEY' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "username": "user@example.com", 
-    "password": "SecurePassword123!"
+    "email": "user@example.com", 
+    "active": true
 }'
 ```
-Tip: create a secure password using [`openssl`](https://www.openssl.org/docs/man1.0.2/man1/openssl.html)
-```
-openssl rand -base64 32
-```
+
 
 Replace `YOUR_API_KEY` with your project API token. Check the [docs](https://www.codehooks.io/docs/authentication#app-to-app-authentication-with-api-tokens) on how to create an API token.
 
@@ -512,8 +537,8 @@ Content-Type: application/json
 x-apikey: YOUR_API_KEY
 
 {
-    "username": "user@example.com",
-    "password": "SecurePassword123!"
+    "email": "user@example.com",
+    "active": true
 }
 ```
 
@@ -522,22 +547,20 @@ x-apikey: YOUR_API_KEY
 ```json
 {
   "id": "user_1234567890",
-  "username": "user@example.com",
-  "created": "2024-02-14T12:34:56Z"
+  "email": "user@example.com",
+  "active": true
 }
 ```
 
 #### Error Responses:
 
-- 400 Bad Request: Missing or invalid username or password
+- 400 Bad Request: Missing or invalid email
 - 401 Unauthorized: Invalid API key
-- 409 Conflict: Username already exists
+- 409 Conflict: Email already exists
 - 500 Internal Server Error: Server-side error
 
 #### Notes:
-
-- The password should be sufficiently strong. It's recommended to use a combination of uppercase and lowercase letters, numbers, and special characters.
-- For security reasons, the password is not returned in the response.
+  
 - This endpoint should only be used by administrators to create new accounts. Regular user registration should be handled through a separate, rate-limited endpoint.
 
 ## Environment Variables

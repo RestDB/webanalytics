@@ -12,7 +12,7 @@
   "author": "jones@codehooks.io",
   "license": "ISC",
   "dependencies": {
-    "codehooks-auth": "^0.0.4",
+    "codehooks-auth": "^1.0.0",
     "codehooks-js": "^1.2.18",
     "countries-list": "^3.1.1",
     "lodash": "^4.17.21",

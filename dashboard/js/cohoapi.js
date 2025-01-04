@@ -46,7 +46,7 @@ async function fetchWithJWT(url, options = {}) {
             return fetch(url, originalRequestOptions);
         } catch (error) {
             console.error('Token refresh failed:', error);
-            return window.location.href = '/auth/login.html';
+            return window.location.href = '/auth/login';
         }
     }
 
