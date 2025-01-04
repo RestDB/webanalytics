@@ -38,7 +38,7 @@ The heatmap shows you where your users are clicking on a world map. The map is p
 
 ![Screenshot 2](/screenshots/heatmap.png)
 
-Secure authentication powered by the open source [codehooks-auth](https://www.npmjs.com/package/codehooks-auth) package.
+Protected by secure authentication powered by the open source [codehooks-auth](https://www.npmjs.com/package/codehooks-auth) package.
 
 ![Screenshot 3](/screenshots/signin.png)
 
@@ -162,20 +162,7 @@ npm run deploy
 
 ### Creating a New User
 
-Use the following curl command to create a new user:
-
-```
-curl --location 'https://your-coho-app-url.codehooks.io/auth/createuser' \
---header 'x-apikey: YOUR_API_KEY' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "email": "user@example.com", 
-    "active": true
-}'
-```
-
-
-Replace `YOUR_API_KEY` with your project API token. Check the [docs](https://www.codehooks.io/docs/authentication#app-to-app-authentication-with-api-tokens) on how to create an API token.
+Follow the instructions in the [codehooks-auth](https://github.com/RestDB/codehooks-auth?tab=readme-ov-file#manage-your-users) documentation to create a new user.
 
 ### Integrating the Web Analytics Client JavaScript
 
@@ -513,55 +500,6 @@ Example response:
 - 403 Forbidden: Insufficient permissions
 - 500 Internal Server Error: Server-side error
 
-### Create User
-
-Endpoint: `POST /auth/createuser`
-
-This endpoint allows you to create a new user account.
-
-#### Headers:
-
-- `x-apikey`: Your API key
-
-#### Body:
-
-JSON object with the following properties:
-- `username`: The email address of the new user
-- `password`: The password for the new user
-
-#### Request:
-
-```
-POST https://your-coho-app-url.codehooks.io/auth/createuser
-Content-Type: application/json
-x-apikey: YOUR_API_KEY
-
-{
-    "email": "user@example.com",
-    "active": true
-}
-```
-
-#### Response:
-
-```json
-{
-  "id": "user_1234567890",
-  "email": "user@example.com",
-  "active": true
-}
-```
-
-#### Error Responses:
-
-- 400 Bad Request: Missing or invalid email
-- 401 Unauthorized: Invalid API key
-- 409 Conflict: Email already exists
-- 500 Internal Server Error: Server-side error
-
-#### Notes:
-  
-- This endpoint should only be used by administrators to create new accounts. Regular user registration should be handled through a separate, rate-limited endpoint.
 
 ## Environment Variables
 
