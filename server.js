@@ -9,6 +9,21 @@ import { generatePixel, extractTopDomain } from './api/utils.js';
 import { initAuth } from 'codehooks-auth'
 import { aiassist } from './api/aiassist.js';
 import { DOMAIN_LIST } from './dashboard/js/config.js';
+
+/*
+* Cache function for static assets headers
+*/
+const ONE_DAY =  86400000;
+const cacheFunction = (req, res, next) => {
+  // Set cache headers
+  res.set('Cache-Control', `public, max-age=${ONE_DAY*15}, s-maxage=${ONE_DAY*15}, immutable`);
+  res.setHeader("Expires", new Date(Date.now() + ONE_DAY*15).toUTCString());
+  res.removeHeader('Pragma');
+  res.removeHeader('Surrogate-Control');
+  console.log('static auth hook', req.originalUrl)
+  next()
+}
+
 /*
 Authentication
 */
@@ -18,6 +33,7 @@ const settings = {
   redirectSuccessUrl: '/dashboard/index.html', // where to redirect after successful login
   baseAPIRoutes: '/api', // protected routes
   emailProvider: 'mailgun',
+  baseUrl: 'https://app.coholytics.info',
   emailSettings: {
     mailgun: {
       MAILGUN_APIKEY: process.env.MAILGUN_APIKEY,
@@ -38,7 +54,8 @@ const settings = {
       }
       resolve();
     });
-  }
+  },
+  staticHook: cacheFunction
 }
 
 function checkDomain(req) {
@@ -108,7 +125,7 @@ app.get('/', (req, res) => {
 // setup auth settings
 initAuth(app, settings)
 //app.static({route: '/auth', directory: '/auth/assets', default: 'login.html'})
-app.static({ route: '/dashboard', directory: '/dashboard', default: 'index.html' })
+app.static({ route: '/dashboard', directory: '/dashboard', default: 'index.html' }, cacheFunction)
 
 /*
   Data API
