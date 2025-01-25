@@ -709,6 +709,10 @@ video {
   border-radius: 0.5rem;
 }
 
+.border {
+  border-width: 1px;
+}
+
 .p-2 {
   padding: 0.5rem;
 }

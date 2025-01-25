@@ -471,7 +471,7 @@ export function dashboard() {
             };
 
 
-            let heatmapLayer = new HeatmapOverlay(cfg);
+            //let heatmapLayer = new HeatmapOverlay(cfg);
 
             let baseLayer = L.tileLayer(
                     'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -483,7 +483,7 @@ export function dashboard() {
 
             // Create a new map instance
             this.mapInstance = new L.Map('world_map', {            
-                layers: [baseLayer, heatmapLayer],
+                layers: [baseLayer],
                 center: [51.5074, -0.1278], // Coordinates for London
                 zoom: 3, // Adjust this value to set the initial zoom level
                 language: 'en' // Set the language to English for the map instance
@@ -492,33 +492,44 @@ export function dashboard() {
             // Create a bounds object to adjust the map view based on locations
             const bounds = L.latLngBounds();
             
+            // Calculate max count once before the loop
+            const maxCount = Math.max(...this.geoLocCounts.map(loc => loc.count));
             
-            if (this.geoLocCounts.length > 0) {
-                this.geoLocCounts.forEach((geoData) => {
-                    // Check if lat and lon are valid numbers
-                    if (typeof geoData.lat === 'number' && typeof geoData.lon === 'number' && !isNaN(geoData.lat) && !isNaN(geoData.lon)) {
-                        const location = L.latLng(geoData.lat, geoData.lon);
-                        bounds.extend(location);
+            this.geoLocCounts.forEach((geoData) => {
+                // Check if lat and lon are valid numbers
+                if (typeof geoData.lat === 'number' && typeof geoData.lon === 'number' && !isNaN(geoData.lat) && !isNaN(geoData.lon)) {
+                    const location = L.latLng(geoData.lat, geoData.lon);
+                    bounds.extend(location);
 
-                        // Create the circle
-                        L.circle(location, {
-                            color: 'black',
-                            fillColor: '#30f',
-                            fillOpacity: 0.1,
-                            radius: 1000
-                        }).addTo(this.mapInstance);
-                    } else {
-                        console.warn('Invalid coordinates:', geoData);
-                    }
-                });
-
-                // Only fit bounds if there are valid locations
-                if (bounds.isValid()) {
-                    heatmapLayer.setData({data: this.geoLocCounts});
-                    this.mapInstance.fitBounds(bounds);
+                    // Calculate color intensity based on pre-calculated maxCount
+                    const intensity = Math.min(1, geoData.count / maxCount);
+                    const red = Math.floor(255 * intensity);
+                    
+                    // Create the circle with dynamic color
+                    L.circle(location, {
+                        color: `rgb(${red}, 0, 0)`,
+                        fillColor: `rgb(${red}, 0, 0)`,
+                        fillOpacity: 0.2,
+                        radius: 1000 + (geoData.count * 100)
+                    })
+                    .bindTooltip(geoData.count.toString(), {
+                        permanent: true,
+                        direction: 'center',
+                        opacity: 1,
+                        className: 'location-count-label transparent-tooltip'
+                    })
+                    .bindPopup(`<strong>Visitors:</strong> ${geoData.count}`)
+                    .addTo(this.mapInstance);
+                } else {
+                    console.warn('Invalid coordinates:', geoData);
                 }
-            }
+            });
             
+            // Only fit bounds if there are valid locations
+            if (bounds.isValid()) {
+                //heatmapLayer.setData({data: this.geoLocCounts});
+                this.mapInstance.fitBounds(bounds);
+            }
         },
 
         init() {

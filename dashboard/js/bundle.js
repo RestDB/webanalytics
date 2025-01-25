@@ -486,7 +486,6 @@
           // which field name in your data represents the data value - default "value"
           valueField: "count"
         };
-        let heatmapLayer = new HeatmapOverlay(cfg);
         let baseLayer = L.tileLayer(
           "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
           {
@@ -497,7 +496,7 @@
           }
         );
         this.mapInstance = new L.Map("world_map", {
-          layers: [baseLayer, heatmapLayer],
+          layers: [baseLayer],
           center: [51.5074, -0.1278],
           // Coordinates for London
           zoom: 3,
@@ -506,25 +505,30 @@
           // Set the language to English for the map instance
         });
         const bounds = L.latLngBounds();
-        if (this.geoLocCounts.length > 0) {
-          this.geoLocCounts.forEach((geoData) => {
-            if (typeof geoData.lat === "number" && typeof geoData.lon === "number" && !isNaN(geoData.lat) && !isNaN(geoData.lon)) {
-              const location = L.latLng(geoData.lat, geoData.lon);
-              bounds.extend(location);
-              L.circle(location, {
-                color: "black",
-                fillColor: "#30f",
-                fillOpacity: 0.1,
-                radius: 1e3
-              }).addTo(this.mapInstance);
-            } else {
-              console.warn("Invalid coordinates:", geoData);
-            }
-          });
-          if (bounds.isValid()) {
-            heatmapLayer.setData({ data: this.geoLocCounts });
-            this.mapInstance.fitBounds(bounds);
+        const maxCount = Math.max(...this.geoLocCounts.map((loc) => loc.count));
+        this.geoLocCounts.forEach((geoData) => {
+          if (typeof geoData.lat === "number" && typeof geoData.lon === "number" && !isNaN(geoData.lat) && !isNaN(geoData.lon)) {
+            const location = L.latLng(geoData.lat, geoData.lon);
+            bounds.extend(location);
+            const intensity = Math.min(1, geoData.count / maxCount);
+            const red = Math.floor(255 * intensity);
+            L.circle(location, {
+              color: `rgb(${red}, 0, 0)`,
+              fillColor: `rgb(${red}, 0, 0)`,
+              fillOpacity: 0.2,
+              radius: 1e3 + geoData.count * 100
+            }).bindTooltip(geoData.count.toString(), {
+              permanent: true,
+              direction: "center",
+              opacity: 1,
+              className: "location-count-label transparent-tooltip"
+            }).bindPopup(`<strong>Visitors:</strong> ${geoData.count}`).addTo(this.mapInstance);
+          } else {
+            console.warn("Invalid coordinates:", geoData);
           }
+        });
+        if (bounds.isValid()) {
+          this.mapInstance.fitBounds(bounds);
         }
       },
       init() {
