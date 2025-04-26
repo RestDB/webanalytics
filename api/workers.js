@@ -22,7 +22,7 @@ export const trackerWorker = async (workerdata, work) => {
         // Construct a flattened data object
         const data = {
           domain: extractTopDomain(headers['referer']),
-          ip: headers['x-real-ip'],
+          ip: headers["x-original-forwarded-for"] || headers['x-real-ip'],
           acceptLanguage: headers['accept-language'],
           userAgent: headers['user-agent'],
           osName: userAgentInfo.os.name,
